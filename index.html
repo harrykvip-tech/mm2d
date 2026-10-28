@@ -68,8 +68,8 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
   <h2>ဂဏန်းထည့်ရန်</h2>
   <textarea id="inp" rows="4" placeholder="customer ပို့တဲ့စာကို တစ်ခုလုံး paste လုပ်ပါ (စာကြောင်းရှည်လည်း ရ၊ တစ်ကြောင်းချင်းလည်း ရ)&#10;26 500 45R1000 07 r 2000&#10;12 300"></textarea>
   <button class="go" id="add">ထည့်မည်</button>
-  <button class="link" id="imgbtn" style="margin-top:6px;width:100%">ပုံနဲ့ တင်မည် (ကင်မရာ / Screenshot)</button>
-  <input type="file" id="img" accept="image/*" multiple hidden>
+  <label class="link" id="imgbtn" for="img" style="display:block;text-align:center;margin-top:6px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--mute);cursor:pointer;-webkit-tap-highlight-color:transparent">ပုံနဲ့ တင်မည် (ကင်မရာ / Screenshot)</label>
+  <input type="file" id="img" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)">
   <details style="margin-top:8px"><summary style="font-size:13px;color:var(--mute);cursor:pointer">အထူးစာလုံးများ ကြည့်ရန်</summary><div id="help" class="msg" style="line-height:1.8"></div></details>
   <button class="link" id="skip" hidden style="margin-top:6px;width:100%">နားမလည်တာကို ကျော်ပြီး ကျန်တာ ထည့်မည်</button>
   <div class="quick">
@@ -289,7 +289,6 @@ async function readImage(b){
   }
   return ocr(b);
 }
-$('imgbtn').onclick=function(){$('img').click()};
 $('img').onchange=async function(){
   var files=[].slice.call(this.files);this.value='';if(!files.length)return;
   for(var i=0;i<files.length;i++){
