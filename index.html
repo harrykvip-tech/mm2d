@@ -50,10 +50,12 @@ label{font-size:12px;color:var(--mute);display:block;margin-bottom:3px}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-bottom:8px}
 th,td{padding:5px 3px;border-bottom:1px solid var(--line);font-size:13px;text-align:right}th:first-child,td:first-child{text-align:left}
 label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--mute);margin-top:10px}label.chk input{width:auto;margin-top:4px}th{color:var(--mute);font-weight:500;font-size:11px}.tw{overflow-x:auto}
+main{position:relative}.dev{position:absolute;top:-6px;right:0;font-size:11px;color:var(--mute);letter-spacing:.02em}
 </style>
 </head>
 <body>
 <main>
+<div class="dev">Developer by - Ca.O</div>
 <h1><svg width="30" height="30" viewBox="0 0 100 100" style="vertical-align:middle;margin-right:8px" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#f4efe6" stroke="#d9cbb5" stroke-width="3"/><rect x="24" y="12" width="52" height="76" rx="7" fill="#2a2118"/><rect x="30" y="18" width="40" height="18" rx="3" fill="#f4efe6"/><g fill="#7a6b5a"><rect x="30" y="43" width="11" height="9" rx="2"/><rect x="44.5" y="43" width="11" height="9" rx="2"/><rect x="59" y="43" width="11" height="9" rx="2"/><rect x="30" y="56" width="11" height="9" rx="2"/><rect x="44.5" y="56" width="11" height="9" rx="2"/><rect x="59" y="56" width="11" height="9" rx="2"/><rect x="30" y="69" width="11" height="9" rx="2"/><rect x="44.5" y="69" width="11" height="9" rx="2"/></g><rect x="59" y="69" width="11" height="9" rx="2" fill="#b3261e"/></svg>2D စာရင်း</h1>
 <div class="seg" role="group" aria-label="အချိန်ရွေး">
   <button id="s1" aria-pressed="true">12:01</button><button id="s2" aria-pressed="false">4:30</button>
@@ -273,6 +275,15 @@ function loadScript(u){return new Promise(function(ok,no){var t=document.createE
 var mode='';
 function stat(m,err){var e=$('imgstat');e.textContent=m;e.className='msg'+(err?' err':'')}
 function withTimeout(p,ms){return Promise.race([p,new Promise(function(_,no){setTimeout(function(){no(new Error('အချိန်ကြာလွန်းသည် (အင်တာနက်နှေးနိုင်သည်)၊ ပြန်ကြိုးစားပါ'))},ms)})])}
+function prep(b){return new Promise(function(ok,no){var im=new Image(),u=URL.createObjectURL(b);
+  im.onload=function(){var k=Math.max(1,Math.min(3,2400/Math.max(im.width,im.height))),c=document.createElement('canvas');
+    c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);var x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
+    var d=x.getImageData(0,0,c.width,c.height),a=d.data,i,sum=0,n=a.length/4;
+    for(i=0;i<a.length;i+=4){a[i]=a[i]*.3+a[i+1]*.59+a[i+2]*.11;sum+=a[i]}
+    var inv=sum/n<110,th=Math.min(150,Math.max(100,sum/n*0.8));
+    for(i=0;i<a.length;i+=4){var g=inv?(a[i]>th?0:255):(a[i]<th?0:255);a[i]=a[i+1]=a[i+2]=g}
+    x.putImageData(d,0,0);URL.revokeObjectURL(u);c.toBlob(function(r){r?ok(r):no(new Error('prep'))},'image/png')};
+  im.onerror=function(){no(new Error('prep'))};im.src=u})}
 async function ocr(b){
   stat('OCR စနစ်ကို ဒေါင်းလုဒ်လုပ်နေသည်... (ပထမအကြိမ် တစ်မိနစ်လောက် ကြာနိုင်)');
   if(!window.Tesseract)await withTimeout(loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'),60000);
@@ -281,7 +292,8 @@ async function ocr(b){
     else stat('OCR ပြင်ဆင်နေသည်... ('+m.status+' '+Math.round((m.progress||0)*100)+'%)')}}),150000);
   try{
     await w.setParameters({tessedit_char_whitelist:'0123456789RrBbKk=-/:., ',tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
-    var r=await withTimeout(w.recognize(b),120000);mode='ocr';return r.data.text;
+    var pb=b;try{pb=await prep(b)}catch(e){}
+    var r=await withTimeout(w.recognize(pb),120000);mode='ocr';return r.data.text;
   }finally{try{await w.terminate()}catch(e){}}
 }
 async function readImage(b){
@@ -314,6 +326,56 @@ async function handleFiles(files){
 function pick(){var f=[].slice.call(this.files);this.value='';handleFiles(f)}
 $('img').onchange=pick;$('cam').onchange=pick;
 setSess('1');
+})();
+</script>
+<script>
+/* LICENSE: Device ID + developer-signed activation code (ECDSA P-256) */
+(function(){
+var cfg=window.APP_CONFIG||{},PK=cfg.LICENSE_PUBKEY;
+if(!PK)return; // key မထည့်ရသေးရင် လော့ခ်မလုပ်ပါ
+/*LICFN*/
+function b64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+async function check(code,id){
+  try{var p=String(code).trim().split('.');if(p.length!==2)return {ok:false,m:'ကုဒ်ပုံစံ မမှန်ပါ'};
+    var key=await crypto.subtle.importKey('jwk',PK,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+    var payload=b64u(p[0]);
+    if(!await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},key,b64u(p[1]),payload))return {ok:false,m:'ကုဒ် မမှန်ပါ'};
+    var t=new TextDecoder().decode(payload).split('|');
+    if(t[0]!==id)return {ok:false,m:'ဒီကုဒ်က ဒီစက်အတွက် မဟုတ်ပါ'};
+    if(t[1]!=='0'&&new Date(t[1]+'T23:59:59')<new Date())return {ok:false,m:'သက်တမ်းကုန်သွားပါပြီ ('+t[1]+')'};
+    return {ok:true,exp:t[1]};
+  }catch(e){return {ok:false,m:'စစ်ဆေး၍မရပါ'}}
+}
+/*LICFNEND*/
+function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function devId(){var id=get('app_device_id');if(id)return id;
+  var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(10));id='';
+  for(var i=0;i<10;i++){id+=A[r[i]%A.length];if(i===4)id+='-'}set('app_device_id',id);return id}
+var ov;
+function show(msg){
+  if(!ov){ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:9999;background:var(--bg);overflow:auto;padding:24px 16px;font:15px/1.6 system-ui,"Noto Sans Myanmar","Myanmar Text",sans-serif;color:var(--ink)';
+    ov.innerHTML='<div style="max-width:420px;margin:0 auto"><div style="text-align:right;font-size:11px;color:var(--mute)">Developer by - Ca.O</div>'+
+    '<h1 style="font-size:20px;margin:18px 0 6px">အသုံးပြုခွင့် လိုအပ်ပါသည်</h1>'+
+    '<p style="color:var(--mute);margin:0 0 14px">အောက်က Device ID ကို Developer (Ca.O) ထံ ပို့ပြီး Activation code တောင်းပါ။</p>'+
+    '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center"><div style="font-size:12px;color:var(--mute)">Device ID</div>'+
+    '<div id="lic-id" style="font:700 26px/1.4 ui-monospace,monospace;letter-spacing:.06em;user-select:all"></div>'+
+    '<button id="lic-copy" style="margin-top:6px">Copy</button></div>'+
+    '<label for="lic-in" style="display:block;margin:16px 0 4px;font-size:13px;color:var(--mute)">Activation code</label>'+
+    '<textarea id="lic-in" rows="4" style="width:100%;font:13px/1.4 ui-monospace,monospace;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)"></textarea>'+
+    '<button id="lic-go" style="width:100%;margin-top:8px;padding:12px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-weight:700;font-size:15px">အသုံးပြုခွင့် ဖွင့်မည်</button>'+
+    '<div id="lic-msg" style="min-height:22px;margin-top:8px;color:var(--acc);font-size:14px"></div></div>';
+    document.body.appendChild(ov);var id=devId();ov.querySelector('#lic-id').textContent=id;
+    ov.querySelector('#lic-copy').onclick=function(){try{navigator.clipboard.writeText(id);this.textContent='Copied ✓'}catch(e){this.textContent='ဖိနှိပ်ကူးပါ'}};
+    ov.querySelector('#lic-go').onclick=async function(){var code=ov.querySelector('#lic-in').value,r=await check(code,devId());
+      if(r.ok){set('app_license',code.trim());ov.remove();ov=null}else ov.querySelector('#lic-msg').textContent=r.m};
+  }
+  ov.querySelector('#lic-msg').textContent=msg||'';
+}
+(async function(){var c=get('app_license');
+  if(!c){show();return}
+  var r=await check(c,devId());if(!r.ok)show(r.m)})();
 })();
 </script>
 </body>
