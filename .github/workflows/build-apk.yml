@@ -24,9 +24,11 @@ jobs:
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
           npx cap sync android
       - name: Make app icon
+        continue-on-error: true
         run: |
-          pip install pillow
-          python3 - <<'PY'
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/pip install pillow
+          /tmp/venv/bin/python - <<'PY'
           from PIL import Image, ImageDraw
           import os
           def logo(bg, scale, path):
