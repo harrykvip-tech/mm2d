@@ -13,16 +13,32 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - name: Helper
+        run: |
+          cat > "$HOME/try.sh" <<'EOS'
+          try() {
+            label="$1"; shift
+            "$@" > /tmp/out.log 2>&1 && rc=0 || rc=$?
+            if [ "$rc" -ne 0 ]; then
+              msg=$( (grep -iE 'error|exception|failed|not found|wrong|cannot|could not' /tmp/out.log | head -6; echo ---; tail -n 6 /tmp/out.log) | tr '\n' ' ' | tr -d '\r' | cut -c1-1000 )
+              echo "::error title=FAILED at ${label}::${msg}"
+              cat /tmp/out.log
+              exit "$rc"
+            fi
+            cat /tmp/out.log
+          }
+          EOS
       - name: Prepare web files
         run: |
-          mkdir -p www
-          cp index.html config.js favicon.svg manifest.webmanifest icon-192.png icon-512.png www/
+          source "$HOME/try.sh"
+          try "copy files" bash -c 'mkdir -p www && cp index.html config.js favicon.svg manifest.webmanifest icon-192.png icon-512.png www/ && ls -la www'
       - name: Add Android platform
         run: |
-          npm install
-          npx cap add android
-          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
-          npx cap sync android
+          source "$HOME/try.sh"
+          try "npm install" npm install
+          try "cap add android" npx cap add android
+          try "camera permission" sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
+          try "cap sync" npx cap sync android
       - name: Make app icon
         continue-on-error: true
         run: |
@@ -55,9 +71,10 @@ jobs:
           npx @capacitor/assets generate --android --iconBackgroundColor '#f4efe6' --iconBackgroundColorDark '#f4efe6' || echo "icon generation skipped"
       - name: Build debug APK
         run: |
+          source "$HOME/try.sh"
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          try "gradle assembleDebug" ./gradlew assembleDebug --console=plain
       - uses: actions/upload-artifact@v4
         with:
           name: sarein-2d-apk
