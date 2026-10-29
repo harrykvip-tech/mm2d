@@ -1,0 +1,6 @@
+{
+  "appId": "com.cao.sarein2d",
+  "appName": "2D စာရင်း",
+  "webDir": "www",
+  "server": { "androidScheme": "https" }
+}
