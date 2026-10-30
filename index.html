@@ -148,19 +148,21 @@ var GR={'နက္ခ':'18 24 35 69 70 81 42 53 96 07','ပါဝါ':'05 16 27 
 function sp(x){return x.split(' ')}
 function rev(x){return x[1]+x[0]}
 function withDigit(k){var o=[],i,t;for(i=0;i<100;i++){t=pad(i);if(+t[0]===k||+t[1]===k)o.push(t)}if(!D||D.dup)o.push(''+k+k);return o}
+function digs(t){var o=[];String(t).split('').forEach(function(ch){if(o.indexOf(ch)<0)o.push(ch)});return o}
 function topN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+k+i);return o}
 function endN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+i+k);return o}
 var TEN='10 20 30 40 50 60 70 80 90 00';
 function brk(k){var o=[],i,t;for(i=0;i<100;i++){t=pad(i);if((+t[0]+ +t[1])%10===k)o.push(t)}return o}
 var AMT='(\\d{1,3}(?:,\\d{3})+|\\d+)',SEP='[\\s=\\-*\\/:,()]*';
 var RE_SRC='(နက္ခ|ပါဝါ|အပူး|ညီကို)\\s*([rR])?'+SEP+AMT+'\\s*([rR])?'+
-  '|(\\d)\\s*(အပါ|ပတ်)'+SEP+AMT+
-  '|(\\d)\\s*(ဘရိတ်|bk)'+SEP+AMT+
+  '|(\\d{1,10})[\\s.\\-,]*(အပါ|ပတ်)'+SEP+AMT+
+  '|(\\d{1,10})[\\s.\\-,]*(ဘရိတ်|bk)'+SEP+AMT+
   '|(\\d{1,2}(?!\\d)(?:\\s*[.\\-]+\\s*\\d{1,2}(?!\\d))*)[\\s=\\-*\\/:,.]*([rR])?[\\s=\\-*\\/:,.]*'+AMT+'\\s*([rR])?'+
   '|(\\d{2,10})[\\s.\\-,]*(ခွေပူး|ခွေ)'+SEP+AMT+
   '|(ခွေပူး|ခွေ)'+SEP+'(\\d{2,10})'+SEP+AMT+
-  '|(\\d)\\s*(ထိပ်|ပိတ်)'+SEP+AMT+
-  '|(ဆယ်ပြည့်|ဆယ်ဖြစ်)'+SEP+AMT;
+  '|(\\d{1,10})[\\s.\\-,]*(ထိပ်|ပိတ်)'+SEP+AMT+
+  '|(ဆယ်ပြည့်|ဆယ်ဖြစ်)'+SEP+AMT+
+  '|(ထိပ်|ပိတ်)'+SEP+'(\\d{1,10})'+SEP+AMT;
 function toA(x){return parseInt(String(x).replace(/,/g,''),10)}
 // ရိုးရိုးဂဏန်း + အထူးစာလုံး (နက္ခ ပါဝါ အပူး ညီကို အပါ/ပတ် ဘရိတ်/bk) ကို နားလည်သည်
 function parseText(txt){
@@ -175,11 +177,12 @@ function parseText(txt){
       list=sp(GR[m[1]]);g=m[1];
       if(m[1]==='ညီကို'&&(m[2]||m[4])){list=list.concat(list.map(rev));g+=' R'}
       add(list,a,g);
-    }else if(m[5]){a=toA(m[7]);if(!a){bad.push(m[0]);continue}add(withDigit(+m[5]),a,m[5]+' '+m[6])}
-    else if(m[8]){a=toA(m[10]);if(!a){bad.push(m[0]);continue}add(brk(+m[8]),a,m[8]+' '+m[9])}
+    }else if(m[5]){a=toA(m[7]);if(!a){bad.push(m[0]);continue}var o5=[];digs(m[5]).forEach(function(ch){o5=o5.concat(withDigit(+ch))});add(o5,a,m[5]+' '+m[6])}
+    else if(m[8]){a=toA(m[10]);if(!a){bad.push(m[0]);continue}var o8=[];digs(m[8]).forEach(function(ch){o8=o8.concat(brk(+ch))});add(o8,a,m[8]+' '+m[9])}
     else if(m[11]){a=toA(m[13]);if(!a){bad.push(m[0]);continue}
       (m[11].match(/\d{1,2}/g)||[]).forEach(function(x){items.push({n:parseInt(x,10),a:a,r:!!(m[12]||m[14])})})}
-    else if(m[21]){a=toA(m[23]);if(!a){bad.push(m[0]);continue}add(m[22]==='ထိပ်'?topN(+m[21]):endN(+m[21]),a,m[21]+' '+m[22])}
+    else if(m[21]||m[26]){var dg2=m[21]||m[27],kw2=m[22]||m[26],o21=[];a=toA(m[23]||m[28]);if(!a){bad.push(m[0]);continue}
+      digs(dg2).forEach(function(ch){o21=o21.concat(kw2==='ထိပ်'?topN(+ch):endN(+ch))});add(o21,a,dg2+' '+kw2)}
     else if(m[24]){a=toA(m[25]);if(!a){bad.push(m[0]);continue}add(m[24]==='ဆယ်ပြည့်'?sp(TEN):brk(0),a,m[24])}
     else{var dg=m[15]||m[19],kw=m[16]||m[18],ds=[],ii,jj,out=[];a=toA(m[17]||m[20]);if(!a){bad.push(m[0]);continue}
       for(ii=0;ii<dg.length;ii++)if(ds.indexOf(dg[ii])<0)ds.push(dg[ii]);
@@ -300,6 +303,7 @@ $('dup').onchange=function(){D.dup=this.checked;save()};
   h+='<b>5 ဘရိတ် / 5bk</b> 1000 → '+brk(5).join(' ')+' (0 မှ 9 ရ)';
   h+='<br><b>5 ထိပ်</b> 1000 → '+topN(5).join(' ')+'<br><b>3 ပိတ်</b> 1000 → '+endN(3).join(' ')+' (0 မှ 9 ရ)<br>';
   h+='<b>ဆယ်ပြည့်</b> 1000 → '+TEN+'<br><b>ဆယ်ဖြစ်</b> 1000 → '+brk(0).join(' ')+'<br>';
+  h+='<b>549-ထိပ်-2500</b> / <b>549-ပိတ်-2500</b> → ဂဏန်းအများကို ကပ်ရေးလို့ရ (5ထိပ် + 4ထိပ် + 9ထိပ် = ၃၀ ခု)<br>';
   h+='<br><b>70-73-75-R-5000</b> → ဂဏန်းအများကို - နဲ့ ဆက်ရေးလို့ရ၊ R ပါရင် ပြောင်းပြန်ပါ၊ ငွေက အားလုံးအတူတူ<br>';
   h+='<b>1397-ခွေပူး-1500</b> → ဂဏန်း ၄လုံးရဲ့ ပတ်လည် ၁၂ကွက် + အပူး ၄ကွက် (၁၆ ခု)<br>';
   h+='<b>1397-ခွေ-1500</b> → အပူးမပါ ၁၂ ကွက်';
