@@ -1,0 +1,108 @@
+name: Build APK
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Helper
+        run: |
+          cat > "$HOME/try.sh" <<'EOS'
+          try() {
+            label="$1"; shift
+            "$@" > /tmp/out.log 2>&1 && rc=0 || rc=$?
+            if [ "$rc" -ne 0 ]; then
+              msg=$( (grep -E 'AAPT|ERROR:|error:|Exception|not found|Could not|cannot' /tmp/out.log | head -8; echo ---; tail -n 4 /tmp/out.log) | tr '\n' ' ' | tr -d '\r' | cut -c1-1500 )
+              echo "::error title=FAILED at ${label}::${msg}"
+              cat /tmp/out.log
+              exit "$rc"
+            fi
+            cat /tmp/out.log
+          }
+          EOS
+      - name: Prepare web files
+        run: |
+          source "$HOME/try.sh"
+          try "copy files" bash -c 'mkdir -p www && cp index.html config.js favicon.svg manifest.webmanifest icon-192.png icon-512.png www/ && ls -la www'
+      - name: Add Android platform
+        run: |
+          source "$HOME/try.sh"
+          try "npm install" npm install
+          try "cap add android" npx cap add android
+          try "cap sync" npx cap sync android
+      - name: Make app icon
+        continue-on-error: true
+        run: |
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/pip install pillow
+          /tmp/venv/bin/python - <<'PY'
+          import glob, os
+          from PIL import Image, ImageDraw
+          def draw_logo(d, S, scale):
+              u = S / 100 * scale
+              o = (S - 100 * u) / 2
+              def R(x, y, w, h, r, c):
+                  d.rounded_rectangle([o + x * u, o + y * u, o + (x + w) * u, o + (y + h) * u], radius=r * u, fill=c)
+              R(24, 12, 52, 76, 7, '#2a2118')
+              R(30, 18, 40, 18, 3, '#f4efe6')
+              R(33, 22, 22, 3, 1, '#b3261e')
+              for r in (43, 56, 69):
+                  for c in (30, 44.5, 59):
+                      if not (r == 69 and c == 59):
+                          R(c, r, 11, 9, 2, '#7a6b5a')
+              R(59, 69, 11, 9, 2, '#b3261e')
+          def make(size, kind):
+              S = size * 4
+              im = Image.new('RGBA', (S, S), (0, 0, 0, 0))
+              d = ImageDraw.Draw(im)
+              if kind == 'fg':
+                  draw_logo(d, S, 0.52)
+              elif kind == 'round':
+                  d.ellipse([0, 0, S - 1, S - 1], fill='#f4efe6')
+                  draw_logo(d, S, 0.66)
+              else:
+                  d.rounded_rectangle([0, 0, S - 1, S - 1], radius=S * 0.22, fill='#f4efe6')
+                  draw_logo(d, S, 0.80)
+              return im.resize((size, size), Image.LANCZOS)
+          n = 0
+          for f in glob.glob('android/app/src/main/res/mipmap-*/ic_launcher*.png'):
+              size = Image.open(f).size[0]
+              name = os.path.basename(f)
+              kind = 'fg' if 'foreground' in name else ('round' if 'round' in name else 'sq')
+              make(size, kind).save(f)
+              n += 1
+          print('icons replaced:', n)
+          bg = 'android/app/src/main/res/values/ic_launcher_background.xml'
+          os.makedirs(os.path.dirname(bg), exist_ok=True)
+          open(bg, 'w').write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#F4EFE6</color>\n</resources>\n')
+          PY
+      - name: Build debug APK
+        run: |
+          source "$HOME/try.sh"
+          cd android
+          chmod +x gradlew
+          if ./gradlew assembleDebug --console=plain > /tmp/g1.log 2>&1; then
+            tail -n 20 /tmp/g1.log
+          else
+            W=$( (grep -E 'AAPT|ERROR:|error:|Exception' /tmp/g1.log | head -8) | tr '\n' ' ' | tr -d '\r' | cut -c1-1500 )
+            echo "::warning title=First build failed, retrying without custom icon::${W}"
+            cd ..
+            rm -rf android
+            try "cap add android retry" npx cap add android
+            try "cap sync retry" npx cap sync android
+            cd android
+            chmod +x gradlew
+            try "gradle assembleDebug retry" ./gradlew assembleDebug --console=plain
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sarein-2d-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
