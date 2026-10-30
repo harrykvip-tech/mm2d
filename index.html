@@ -50,13 +50,23 @@ label{font-size:12px;color:var(--mute);display:block;margin-bottom:3px}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-bottom:8px}
 th,td{padding:5px 3px;border-bottom:1px solid var(--line);font-size:13px;text-align:right}th:first-child,td:first-child{text-align:left}
 label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--mute);margin-top:10px}label.chk input{width:auto;margin-top:4px}th{color:var(--mute);font-weight:500;font-size:11px}.tw{overflow-x:auto}
-main{position:relative}.dev{position:absolute;top:-6px;right:0;font-size:11px;color:var(--mute);letter-spacing:.02em}
+.hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px}.hdr h1{margin:2px 0}
+#tabbtn{padding:6px 12px;font-size:18px;line-height:1;flex:0 0 auto}
+#drawerbk{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:min(88vw,360px);background:var(--bg);z-index:60;transform:translateX(-104%);transition:transform .22s;display:flex;flex-direction:column;box-shadow:2px 0 18px rgba(0,0,0,.28);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#drawer.open{transform:none}
+.dhead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.dhead b{font-size:16px}.dbody{flex:1;overflow:auto;padding:12px 14px}
+.dbody section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.dfoot{padding:10px 14px;border-top:1px solid var(--line);text-align:center;font-size:12px;color:var(--mute);letter-spacing:.02em}
+.devid{font:700 21px/1.4 ui-monospace,monospace;letter-spacing:.06em;text-align:center;user-select:all}
+.tg{display:block;margin-top:10px;padding:12px;border-radius:10px;background:#229ed9;color:#fff;font-weight:700;text-align:center;text-decoration:none}
+.badge{padding:9px 10px;border-radius:10px;margin-bottom:10px;font-size:14px}.badge.ok{background:#e3f4e8;color:#1f6b3a}.badge.lock{background:#fde8e6;color:#9b1c14}
 </style>
 </head>
 <body>
 <main>
-<div class="dev">Developer by - Ca.O</div>
-<h1><svg width="30" height="30" viewBox="0 0 100 100" style="vertical-align:middle;margin-right:8px" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#f4efe6" stroke="#d9cbb5" stroke-width="3"/><rect x="24" y="12" width="52" height="76" rx="7" fill="#2a2118"/><rect x="30" y="18" width="40" height="18" rx="3" fill="#f4efe6"/><g fill="#7a6b5a"><rect x="30" y="43" width="11" height="9" rx="2"/><rect x="44.5" y="43" width="11" height="9" rx="2"/><rect x="59" y="43" width="11" height="9" rx="2"/><rect x="30" y="56" width="11" height="9" rx="2"/><rect x="44.5" y="56" width="11" height="9" rx="2"/><rect x="59" y="56" width="11" height="9" rx="2"/><rect x="30" y="69" width="11" height="9" rx="2"/><rect x="44.5" y="69" width="11" height="9" rx="2"/></g><rect x="59" y="69" width="11" height="9" rx="2" fill="#b3261e"/></svg>2D စာရင်း</h1>
+<div class="hdr"><button id="tabbtn" aria-label="Tab ဖွင့်ရန်" aria-expanded="false">☰</button><h1><svg width="30" height="30" viewBox="0 0 100 100" style="vertical-align:middle;margin-right:8px" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#f4efe6" stroke="#d9cbb5" stroke-width="3"/><rect x="24" y="12" width="52" height="76" rx="7" fill="#2a2118"/><rect x="30" y="18" width="40" height="18" rx="3" fill="#f4efe6"/><g fill="#7a6b5a"><rect x="30" y="43" width="11" height="9" rx="2"/><rect x="44.5" y="43" width="11" height="9" rx="2"/><rect x="59" y="43" width="11" height="9" rx="2"/><rect x="30" y="56" width="11" height="9" rx="2"/><rect x="44.5" y="56" width="11" height="9" rx="2"/><rect x="59" y="56" width="11" height="9" rx="2"/><rect x="30" y="69" width="11" height="9" rx="2"/><rect x="44.5" y="69" width="11" height="9" rx="2"/></g><rect x="59" y="69" width="11" height="9" rx="2" fill="#b3261e"/></svg>2D စာရင်း</h1></div>
 <div class="seg" role="group" aria-label="အချိန်ရွေး">
   <button id="s1" aria-pressed="true">12:01</button><button id="s2" aria-pressed="false">4:30</button>
 </div>
@@ -102,8 +112,16 @@ main{position:relative}.dev{position:absolute;top:-6px;right:0;font-size:11px;co
   <label class="chk"><input type="checkbox" id="dup"> ၁ အပါ/ပတ် စသည်မှာ 11 (အပူး) ကို နှစ်ကြိမ်ထည့်ရန် (စုစုပေါင်း ၂၀ ခု)</label>
   <div id="res" style="margin-top:8px"></div>
 </div>
-<details class="card" id="histcard"><summary style="cursor:pointer;font-weight:600">နေ့စဉ် မှတ်တမ်း (ရက်အလိုက်)</summary><div id="histlist" class="tw" style="margin-top:8px"></div></details>
 </main>
+<div id="drawerbk" hidden></div>
+<aside id="drawer" aria-hidden="true">
+  <div class="dhead"><b>2D စာရင်း · Tab</b><button id="dclose" aria-label="ပိတ်မည်">✕</button></div>
+  <div class="dbody">
+    <section><h2>Key / သက်တမ်း</h2><div id="licbox" class="msg">Key စနစ် မဖွင့်ထားပါ</div></section>
+    <section><h2>တစ်နေ့တာ မှတ်တမ်း (History)</h2><div id="histlist" class="tw"></div></section>
+  </div>
+  <div class="dfoot">Developer by - Ca.O</div>
+</aside>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
@@ -153,49 +171,58 @@ function topN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+k+i);return o}
 function endN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+i+k);return o}
 var TEN='10 20 30 40 50 60 70 80 90 00';
 function brk(k){var o=[],i,t;for(i=0;i<100;i++){t=pad(i);if((+t[0]+ +t[1])%10===k)o.push(t)}return o}
-var AMT='(\\d{1,3}(?:,\\d{3})+|\\d+)',SC='[\\s=\\-*\\/\\\\:,.;|_()~]',SEP=SC+'*',DS='[\\s.\\-,\\/_|]*',LS='(?:\\s*[.\\-,\\/_|]+\\s*|\\s+)';
-var RE_SRC='(နက္ခတ်|နက္ခ|ပါဝါ|အပူး|ညီကို)'+SEP+'([rR])?'+SEP+AMT+'\\s*([rR])?'+
-  '|(\\d{1,10})'+DS+'(အပါ|ပတ်|ပါ)'+SEP+AMT+
-  '|(\\d{1,10})'+DS+'(ဘရိတ်|ဘရိတ|bk)'+SEP+AMT+
-  '|(\\d{1,2}(?!\\d)(?:'+LS+'\\d{1,2}(?!\\d))*)'+SEP+'([rR])?'+SEP+AMT+'\\s*([rR])?'+
-  '|(\\d{2,10})'+DS+'(ခွေပူး|ခွေ)'+SEP+AMT+
-  '|(ခွေပူး|ခွေ)'+SEP+'(\\d{2,10})'+SEP+AMT+
-  '|(\\d{1,10})'+DS+'(ထိပ်|ပိတ်)'+SEP+AMT+
+var AMT='(\\d{1,3}(?:,\\d{3})+|\\d+)',SC='[\\s=\\-*\\/\\\\:,.;|_()~]',SEP=SC+'*',DS='[\\s.\\-,\\/_|]*',SB='[\\s.\\-,\\/_|]+',LS='(?:\\s*[.\\-,\\/_|]+\\s*|\\s+)',
+DG='(?<!\\d)(?:\\d(?!\\d)(?:'+SB+'\\d(?!\\d))*|\\d{2,10})';
+// အဆင့် A: စကားလုံးပါတဲ့ ပုံစံတွေ (ထိပ် ပိတ် ခွေ အပါ ဘရိတ် နက္ခ ...)၊ ဂဏန်းကို 6/7/8 ၊ 2-3-4 ၊ 5 6 7 ၊ 427 ဘယ်လိုရေးရေး ရ
+var RE_A='(နက္ခတ်|နက္ခ|ပါဝါ|အပူး|ညီကို)'+SEP+'([rR])?'+SEP+AMT+'\\s*([rR])?'+
+  '|('+DG+')'+DS+'(အပါ|ပတ်|ပါ)'+SEP+AMT+
+  '|('+DG+')'+DS+'(ဘရိတ်|ဘရိတ|bk)'+SEP+AMT+
+  '|('+DG+')'+DS+'(ခွေပူး|ခွေ)'+SEP+AMT+
+  '|(ခွေပူး|ခွေ)'+SEP+'('+DG+')'+SEP+AMT+
+  '|('+DG+')'+DS+'(ထိပ်|ပိတ်)'+SEP+AMT+
   '|(ဆယ်ပြည့်|ဆယ်ဖြစ်)'+SEP+AMT+
-  '|(ထိပ်|ပိတ်)'+SEP+'(\\d{1,10})'+SEP+AMT;
+  '|(ထိပ်|ပိတ်)'+SEP+'('+DG+')'+SEP+AMT;
+// အဆင့် B: ရိုးရိုးဂဏန်း  12-34-56-R-500 ၊ 56 500R500 (ဂဏန်းနဲ့ ပြောင်းပြန် ငွေမတူ)
+var RE_B='(?<!\\d)(\\d{1,2}(?!\\d)(?:'+LS+'\\d{1,2}(?!\\d))*)'+SEP+'([rR])?'+SEP+AMT+'(?:[.\\-\\/]*([rR])[.\\-\\/]*'+AMT+'|\\s*([rR]))?';
 function toA(x){return parseInt(String(x).replace(/,/g,''),10)}
-// ဂဏန်းမြန်မာ/အင်္ဂလိပ်၊ - . / , space အကုန်ရအောင် ဖတ်ရလွယ်အောင် အရင်ညှိ
+function dset(t){return digs((String(t).match(/\d/g)||[]).join(''))}
 function norm2(t){return norm(String(t)).replace(/[–—−‑‒]/g,'-').replace(/[၊။]/g,' ').replace(/(\d)\s*[xX×✕]\s*(\d)/g,'$1 $2').replace(/ကျပ်|ဖိုး|\bks\b/gi,' ')}
-// စာကြောင်းတစ်ကြောင်းချင်း ခွဲဖတ် (တစ်ကြောင်းမှားလည်း အခြားကြောင်းတွေ မထိ)
 function parseLine(txt){
   txt=norm2(txt);
-  var re=new RegExp(RE_SRC,'gi'),items=[],bad=[],last=0,m,a,list,g;
-  function gap(t){t=t.replace(/[\s,.;:|၊။\-()（）\[\]\/\\_~=*]+/g,'');if(t)bad.push(t)}
+  var items=[],bad=[],m,a,list,g,rest='',last=0,reA=new RegExp(RE_A,'gi');
+  function gap(t){t=t.replace(/[\s,.;:|၊။\-()（）\[\]\/\\_~=*\u0001]+/g,'');if(t)bad.push(t)}
   function add(l,a,g){l.forEach(function(x){items.push({n:parseInt(x,10),a:a,r:false,g:g})})}
-  while((m=re.exec(txt))){
-    gap(txt.slice(last,m.index));last=re.lastIndex;
+  function pairs(ds,withDup){var o=[];ds.forEach(function(x,i){ds.forEach(function(y,j){if(i!==j||withDup)o.push(x+y)})});return o}
+  while((m=reA.exec(txt))){
+    rest+=txt.slice(last,m.index)+'\u0001';last=reA.lastIndex;
     if(m[1]){
       a=toA(m[3]);if(!a){bad.push(m[0]);continue}
       var k1=m[1]==='နက္ခတ်'?'နက္ခ':m[1];
       list=sp(GR[k1]);g=k1;
       if(k1==='ညီကို'&&(m[2]||m[4])){list=list.concat(list.map(rev));g+=' R'}
       add(list,a,g);
-    }else if(m[5]){a=toA(m[7]);if(!a){bad.push(m[0]);continue}var o5=[];digs(m[5]).forEach(function(ch){o5=o5.concat(withDigit(+ch))});add(o5,a,m[5]+' '+m[6])}
-    else if(m[8]){a=toA(m[10]);if(!a){bad.push(m[0]);continue}var o8=[];digs(m[8]).forEach(function(ch){o8=o8.concat(brk(+ch))});add(o8,a,m[8]+' '+m[9])}
-    else if(m[11]){a=toA(m[13]);if(!a){bad.push(m[0]);continue}
-      (m[11].match(/\d{1,2}/g)||[]).forEach(function(x){items.push({n:parseInt(x,10),a:a,r:!!(m[12]||m[14])})})}
-    else if(m[21]||m[26]){var dg2=m[21]||m[27],kw2=m[22]||m[26],o21=[];a=toA(m[23]||m[28]);if(!a){bad.push(m[0]);continue}
-      digs(dg2).forEach(function(ch){o21=o21.concat(kw2==='ထိပ်'?topN(+ch):endN(+ch))});add(o21,a,dg2+' '+kw2)}
-    else if(m[24]){a=toA(m[25]);if(!a){bad.push(m[0]);continue}add(m[24]==='ဆယ်ပြည့်'?sp(TEN):brk(0),a,m[24])}
-    else{var dg=m[15]||m[19],kw=m[16]||m[18],ds=[],ii,jj,out=[];a=toA(m[17]||m[20]);if(!a){bad.push(m[0]);continue}
-      for(ii=0;ii<dg.length;ii++)if(ds.indexOf(dg[ii])<0)ds.push(dg[ii]);
-      for(ii=0;ii<ds.length;ii++)for(jj=0;jj<ds.length;jj++)if(ii!==jj||kw==='ခွေပူး')out.push(ds[ii]+ds[jj]);
-      add(out,a,dg+' '+kw)}
+    }else if(m[5]){a=toA(m[7]);if(!a){bad.push(m[0]);continue}var o5=[];dset(m[5]).forEach(function(ch){o5=o5.concat(withDigit(+ch))});add(o5,a,m[5]+' '+m[6])}
+    else if(m[8]){a=toA(m[10]);if(!a){bad.push(m[0]);continue}var o8=[];dset(m[8]).forEach(function(ch){o8=o8.concat(brk(+ch))});add(o8,a,m[8]+' '+m[9])}
+    else if(m[11]){a=toA(m[13]);if(!a){bad.push(m[0]);continue}add(pairs(dset(m[11]),m[12]==='ခွေပူး'),a,m[11]+' '+m[12])}
+    else if(m[14]){a=toA(m[16]);if(!a){bad.push(m[0]);continue}add(pairs(dset(m[15]),m[14]==='ခွေပူး'),a,m[15]+' '+m[14])}
+    else if(m[17]){a=toA(m[19]);if(!a){bad.push(m[0]);continue}var o17=[];dset(m[17]).forEach(function(ch){o17=o17.concat(m[18]==='ထိပ်'?topN(+ch):endN(+ch))});add(o17,a,m[17]+' '+m[18])}
+    else if(m[20]){a=toA(m[21]);if(!a){bad.push(m[0]);continue}add(m[20]==='ဆယ်ပြည့်'?sp(TEN):brk(0),a,m[20])}
+    else{a=toA(m[24]);if(!a){bad.push(m[0]);continue}var o22=[];dset(m[23]).forEach(function(ch){o22=o22.concat(m[22]==='ထိပ်'?topN(+ch):endN(+ch))});add(o22,a,m[23]+' '+m[22])}
   }
-  gap(txt.slice(last));
+  rest+=txt.slice(last);
+  var reB=new RegExp(RE_B,'gi'),lb=0;
+  while((m=reB.exec(rest))){
+    gap(rest.slice(lb,m.index));lb=reB.lastIndex;
+    a=toA(m[3]);if(!a){bad.push(m[0]);continue}
+    var nums=m[1].match(/\d{1,2}/g)||[];
+    if(m[4]&&m[5]){
+      var a2=toA(m[5]);
+      nums.forEach(function(x){var n=parseInt(x,10),t=pad(n),rv=parseInt(t[1]+t[0],10);items.push({n:n,a:a,r:false});if(a2&&rv!==n)items.push({n:rv,a:a2,r:false})});
+    }else nums.forEach(function(x){items.push({n:parseInt(x,10),a:a,r:!!(m[2]||m[6])})});
+  }
+  gap(rest.slice(lb));
   return {items:items,bad:bad};
 }
-// မှန်တဲ့စာကြောင်းတွေပဲ items ထဲဝင်၊ နားမလည်တဲ့ စာကြောင်းတစ်ကြောင်းလုံးကို bad ထဲ ထည့်ပြ
 function parseText(txt){var items=[],bad=[];String(txt).split(/\r?\n/).forEach(function(l){if(!l.trim())return;var r=parseLine(l);if(r.bad.length)bad.push(l.trim());else items=items.concat(r.items)});return {items:items,bad:bad}}
 function parts(it){var p=[[it.n,it.a]];if(it.r){var s=pad(it.n),rv=+(s[1]+s[0]);if(rv!==it.n)p.push([rv,it.a])}return p}
 function tot(entries){var t=[],s=0,i;for(i=0;i<100;i++)t[i]=0;
@@ -281,7 +308,7 @@ function renderResult(){
 document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-act]');if(!b)return;var a=b.dataset.act,c=cur();
   if(a==='sel'){D.sel=b.dataset.id;armed=null;$('newc').hidden=true;save();renderAll()}
-  else if(a==='goday'){day=b.dataset.d;setSess(b.dataset.s);window.scrollTo(0,0)}
+  else if(a==='goday'){day=b.dataset.d;setSess(b.dataset.s);closeDrawer();window.scrollTo(0,0)}
   else if(a==='newc'){$('newc').hidden=!$('newc').hidden;if(!$('newc').hidden)$('nn').focus()}
   else if(a==='de'&&c){c.entries=c.entries.filter(function(e){return e.id!==b.dataset.e});save();renderDetail();renderResult()}
   else if(a==='delc'&&c){
@@ -295,6 +322,9 @@ function renderAll(){renderNames();renderDetail();renderResult()}
 function setSess(s){sess=s;$('s1').setAttribute('aria-pressed',s==='1');$('s2').setAttribute('aria-pressed',s==='2');
   load();$('dup').checked=!!D.dup;$('win').value=D.win;$('pct').value=D.pct;$('mul').value=D.mul;$('skip').hidden=true;$('newc').hidden=true;renderAll();
   $('day').value=day;$('daynote').textContent=day===ymd(new Date())?'':'⚠ '+day+' ရက်စွဲ စာရင်းကို ကြည့်နေသည် (ယနေ့ မဟုတ်ပါ)';renderHistory()}
+function openDrawer(){$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');$('drawerbk').hidden=false;$('tabbtn').setAttribute('aria-expanded','true');renderHistory()}
+function closeDrawer(){$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');$('drawerbk').hidden=true;$('tabbtn').setAttribute('aria-expanded','false')}
+$('tabbtn').onclick=openDrawer;$('dclose').onclick=closeDrawer;$('drawerbk').onclick=closeDrawer;
 function shiftDay(n){var q=day.split('-'),d=new Date(+q[0],+q[1]-1,+q[2]+n);day=ymd(d);setSess(sess)}
 $('dprev').onclick=function(){shiftDay(-1)};$('dnext').onclick=function(){shiftDay(1)};
 $('dtoday').onclick=function(){day=ymd(new Date());setSess(sess)};
@@ -317,7 +347,7 @@ setSess('1');
 })();
 </script>
 <script>
-/* LICENSE: trial + Device ID + developer-signed key (ECDSA P-256) */
+/* LICENSE: Device ID + developer-signed key (ECDSA P-256) */
 (function(){
 if(!window.APP_CONFIG){
   var eb=document.createElement('div');
@@ -327,7 +357,7 @@ if(!window.APP_CONFIG){
 }
 var cfg=window.APP_CONFIG,PK=cfg.LICENSE_PUBKEY;
 if(!PK)return; // key မထည့်ရသေးရင် လော့ခ်မလုပ်ပါ
-var TRIAL=cfg.TRIAL_DAYS!=null?+cfg.TRIAL_DAYS:3,TG=cfg.CONTACT_URL||'https://t.me/OAK_K7',TGN=cfg.CONTACT_NAME||'@OAK_K7';
+var TRIAL=cfg.TRIAL_DAYS!=null?+cfg.TRIAL_DAYS:0,TG=cfg.CONTACT_URL||'https://t.me/OAK_K7',TGN=cfg.CONTACT_NAME||'@OAK_K7';
 /*LICFN*/
 function b64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
 async function check(code,id,nowMs){
@@ -347,56 +377,56 @@ function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function devId(){var id=get('app_device_id');if(id)return id;
   var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(10));id='';
   for(var i=0;i<10;i++){id+=A[r[i]%A.length];if(i===4)id+='-'}set('app_device_id',id);return id}
-// နာရီကို နောက်ပြန်ရွှေ့ပြီး လိမ်တာကို တားဖို့ အကြိမ်ဆုံးမြင်ဖူးတဲ့အချိန်ကို မှတ်ထား
 function effNow(){var n=Date.now(),l=+get('app_last_seen')||0;if(l>n)n=l;set('app_last_seen',String(n));return n}
 function fmtD(e){return e==='0'?'အကန့်အသတ်မရှိ':e}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 async function status(){
   var now=effNow(),c=get('app_license'),why='';
   if(c){var r=await check(c,devId(),now);if(r.ok)return {state:'active',exp:r.exp,name:r.name};why=r.m}
   if(TRIAL>0){var st=get('app_trial_start');if(!st){st=String(now);set('app_trial_start',st)}
-    var left=TRIAL*864e5-(now-(+st));
-    if(left>0)return {state:'trial',left:left};
-    return {state:'locked',trialUsed:true,why:why}}
-  return {state:'locked',trialUsed:false,why:why};
+    var left=TRIAL*864e5-(now-(+st));if(left>0)return {state:'trial',left:left};}
+  return {state:'locked',why:why};
 }
-var ov=null,btn=null,cur=null;
-function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function setBtn(s){if(!btn)return;btn.textContent=s.state==='trial'?'☰ Menu · အစမ်း '+Math.ceil(s.left/864e5)+' ရက်':'☰ Menu'}
-function panel(mode,s){
+var ov=null;
+function tgLink(){return TG+(TG.indexOf('?')<0?'?':'&')+'text='+encodeURIComponent('Key သက်တမ်း ဝယ်/တိုးလိုပါသည်။ Device ID: '+devId())}
+// Key ထည့်တဲ့ အပိုင်း (လော့ခ်စာမျက်နှာနဲ့ Tab နှစ်နေရာလုံးမှာ သုံး)
+function keyForm(root){
+  var inp=root.querySelector('.lic-in'),msg=root.querySelector('.lic-msg');
+  root.querySelector('.lic-copy').onclick=function(){try{navigator.clipboard.writeText(devId());this.textContent='Copied ✓'}catch(e){this.textContent='ဖိနှိပ်ကူးပါ'}};
+  root.querySelector('.lic-go').onclick=async function(){var code=inp.value,r=await check(code,devId(),effNow());
+    if(r.ok){set('app_license',code.trim());if(ov){ov.remove();ov=null}await refresh()}else msg.textContent=r.m};
+}
+function formHtml(why){
+  return '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center"><div style="font-size:12px;color:var(--mute)">Device ID</div><div class="devid">'+devId()+'</div>'+
+  '<button class="lic-copy" style="margin-top:6px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">Copy</button></div>'+
+  '<a class="tg" href="'+tgLink()+'" target="_blank" rel="noopener">Key သက်တမ်းတိုးရန် · Telegram '+esc(TGN)+'</a>'+
+  '<label style="display:block;margin:14px 0 4px;font-size:13px;color:var(--mute)">Activation key ထည့်ရန်</label>'+
+  '<textarea class="lic-in" rows="3" style="width:100%;font:13px/1.4 ui-monospace,monospace;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)"></textarea>'+
+  '<button class="lic-go" style="width:100%;margin-top:8px;padding:12px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-weight:700;font-size:15px">Key ဖွင့်မည်</button>'+
+  '<div class="lic-msg" style="min-height:22px;margin-top:8px;color:var(--acc);font-size:14px">'+esc(why||'')+'</div>';
+}
+// လော့ခ်ကျတဲ့ အပြည့်စာမျက်နှာ
+function lockPanel(s){
   if(ov){ov.remove();ov=null}
-  var id=devId(),locked=mode==='locked',lg=document.querySelector('h1 svg'),
-  LG=lg?lg.outerHTML.replace('width="30" height="30"','width="64" height="64"').replace('margin-right:8px','margin:0'):'',
-  stat='',title=locked?(s.trialUsed?'အစမ်းသုံးခွင့် ကုန်ဆုံးပါပြီ':'အသုံးပြုခွင့် လိုအပ်ပါသည်'):'Menu',
-  note=locked?(s.trialUsed?'ဤ Device ID သည် အစမ်းသုံးခွင့် ('+TRIAL+' ရက်) အသုံးပြုပြီးသား ဖြစ်နေပါသည်။ ဆက်လက်အသုံးပြုလိုပါက Key သက်တမ်း ဝယ်ယူပါ။':'အောက်က Device ID ကို Developer (Ca.O) ထံ ပို့ပြီး Activation key တောင်းပါ။'):'';
-  if(!locked){stat=s.state==='active'?'<div style="padding:10px;border-radius:10px;background:#e3f4e8;color:#1f6b3a;margin-bottom:10px">✅ အသုံးပြုခွင့်ရှိသည်'+(s.name?' · '+esc(s.name):'')+'<br>သက်တမ်း: <b>'+esc(fmtD(s.exp))+'</b></div>':'<div style="padding:10px;border-radius:10px;background:#fff3d6;color:#7a5200;margin-bottom:10px">🕒 အစမ်းသုံးနေသည် · ကျန် <b>'+Math.ceil(s.left/864e5)+' ရက်</b></div>'}
-  var tgl=TG+(TG.indexOf('?')<0?'?':'&')+'text='+encodeURIComponent('Key သက်တမ်း ဝယ်/တိုးလိုပါသည်။ Device ID: '+id);
+  var lg=document.querySelector('h1 svg'),LG=lg?lg.outerHTML.replace('width="30" height="30"','width="64" height="64"').replace('margin-right:8px','margin:0'):'';
   ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:var(--bg);overflow:auto;padding:22px 16px;font:15px/1.6 system-ui,"Noto Sans Myanmar","Myanmar Text",sans-serif;color:var(--ink)';
-  ov.innerHTML='<div style="max-width:420px;margin:0 auto"><div style="text-align:right;font-size:11px;color:var(--mute)">Developer by - Ca.O</div>'+
-   '<div style="text-align:center;margin-top:6px">'+LG+'</div>'+
-   '<h1 style="font-size:20px;margin:12px 0 6px;text-align:center">'+title+'</h1>'+
-   (note?'<p style="color:var(--mute);margin:0 0 12px;text-align:center">'+note+'</p>':'')+stat+
-   '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center"><div style="font-size:12px;color:var(--mute)">Device ID</div>'+
-   '<div style="font:700 26px/1.4 ui-monospace,monospace;letter-spacing:.06em;user-select:all">'+id+'</div>'+
-   '<button id="lic-copy" style="margin-top:6px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">Copy</button></div>'+
-   '<a id="lic-tg" href="'+tgl+'" target="_blank" rel="noopener" style="display:block;margin-top:12px;padding:13px;border-radius:10px;background:#229ed9;color:#fff;font-weight:700;text-align:center;text-decoration:none">'+(locked?'Key ဝယ်ယူရန်':'Key သက်တမ်းတိုးရန်')+' · Telegram '+esc(TGN)+'</a>'+
-   '<label for="lic-in" style="display:block;margin:16px 0 4px;font-size:13px;color:var(--mute)">Activation key ရှိပြီးသားဆိုရင် ဒီမှာထည့်ပါ</label>'+
-   '<textarea id="lic-in" rows="3" style="width:100%;font:13px/1.4 ui-monospace,monospace;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)"></textarea>'+
-   '<button id="lic-go" style="width:100%;margin-top:8px;padding:12px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-weight:700;font-size:15px">Key ဖွင့်မည်</button>'+
-   '<div id="lic-msg" style="min-height:22px;margin-top:8px;color:var(--acc);font-size:14px">'+esc(s.why||'')+'</div>'+
-   (locked?'':'<button id="lic-close" style="width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)">ပိတ်မည်</button>')+'</div>';
-  document.body.appendChild(ov);
-  ov.querySelector('#lic-copy').onclick=function(){try{navigator.clipboard.writeText(id);this.textContent='Copied ✓'}catch(e){this.textContent='ဖိနှိပ်ကူးပါ'}};
-  ov.querySelector('#lic-go').onclick=async function(){var code=ov.querySelector('#lic-in').value,r=await check(code,devId(),effNow());
-    if(r.ok){set('app_license',code.trim());ov.remove();ov=null;await refresh()}else ov.querySelector('#lic-msg').textContent=r.m};
-  var cl=ov.querySelector('#lic-close');if(cl)cl.onclick=function(){ov.remove();ov=null};
+  ov.innerHTML='<div style="max-width:420px;margin:0 auto"><div style="text-align:center;margin-top:6px">'+LG+'</div>'+
+   '<h1 style="font-size:20px;margin:12px 0 6px;text-align:center">အသုံးပြုခွင့် လိုအပ်ပါသည်</h1>'+
+   '<p style="color:var(--mute);margin:0 0 12px;text-align:center">အောက်က Device ID ကို Developer (Ca.O) ထံ ပို့ပြီး Activation key တောင်းပါ။</p>'+formHtml(s.why)+
+   '<div style="margin-top:18px;text-align:center;font-size:12px;color:var(--mute)">Developer by - Ca.O</div></div>';
+  document.body.appendChild(ov);keyForm(ov);
 }
-async function refresh(){cur=await status();setBtn(cur);if(cur.state==='locked'&&!(ov&&ov.dataset.l))panel('locked',cur);return cur}
-function addBtn(){var m=document.querySelector('main');if(!m||btn)return;btn=document.createElement('button');
-  btn.id='menubtn';btn.style.cssText='position:absolute;top:14px;right:0;padding:4px 10px;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer';
-  btn.onclick=async function(){var s=await status();cur=s;panel(s.state==='locked'?'locked':'menu',s)};m.appendChild(btn)}
-(async function(){addBtn();await refresh();
-  setInterval(async function(){var s=await status();cur=s;setBtn(s);if(s.state==='locked'&&!ov)panel('locked',s)},60000)})();
+// Tab ထဲက Key / သက်တမ်း အပိုင်း
+function renderBox(s){
+  var el=document.getElementById('licbox');if(!el)return;
+  var b=s.state==='active'?'<div class="badge ok">✅ အသုံးပြုခွင့်ရှိသည်'+(s.name?' · '+esc(s.name):'')+'<br>သက်တမ်း: <b>'+esc(fmtD(s.exp))+'</b></div>':
+        s.state==='trial'?'<div class="badge ok">🕒 အစမ်းသုံးနေသည် · ကျန် <b>'+Math.ceil(s.left/864e5)+' ရက်</b></div>':'<div class="badge lock">🔒 Key မရှိပါ</div>';
+  el.className='';el.innerHTML=b+formHtml('');keyForm(el);
+}
+async function refresh(){var s=await status();renderBox(s);if(s.state==='locked')lockPanel(s);return s}
+(async function(){await refresh();
+  setInterval(async function(){var s=await status();renderBox(s);if(s.state==='locked'&&!ov)lockPanel(s)},60000)})();
 })();
 </script>
 </body>
