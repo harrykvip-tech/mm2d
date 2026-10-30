@@ -59,8 +59,10 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
 .dhead b{font-size:16px}.dbody{flex:1;overflow:auto;padding:12px 14px}
 .dbody section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
 .dfoot{padding:10px 14px;border-top:1px solid var(--line);text-align:center;font-size:12px;color:var(--mute);letter-spacing:.02em}
+.g summary{cursor:pointer;font-weight:600;padding:7px 0;font-size:14px}.g details{border-bottom:1px solid var(--line)}.g details:last-child{border:0}
+.g ul{margin:2px 0 8px;padding-left:18px}.g li{font-size:13px;line-height:1.75;margin-bottom:3px}.g code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12.5px;word-break:break-all}
 .devid{font:700 21px/1.4 ui-monospace,monospace;letter-spacing:.06em;text-align:center;user-select:all}
-.tg{display:block;margin-top:10px;padding:12px;border-radius:10px;background:#229ed9;color:#fff;font-weight:700;text-align:center;text-decoration:none}
+.tg{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;padding:12px;border-radius:10px;background:#229ed9;color:#fff;font-weight:700;text-align:center;text-decoration:none}
 .badge{padding:9px 10px;border-radius:10px;margin-bottom:10px;font-size:14px}.badge.ok{background:#e3f4e8;color:#1f6b3a}.badge.lock{background:#fde8e6;color:#9b1c14}
 </style>
 </head>
@@ -119,6 +121,64 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
   <div class="dbody">
     <section><h2>Key / သက်တမ်း</h2><div id="licbox" class="msg">Key စနစ် မဖွင့်ထားပါ</div></section>
     <section><h2>တစ်နေ့တာ မှတ်တမ်း (History)</h2><div id="histlist" class="tw"></div></section>
+    <section class="g"><h2>အသုံးပြုပုံ (အသေးစိတ်)</h2>
+      <details open><summary>၁။ စတင်ရန်</summary><ul>
+        <li>အပေါ်ဆုံး <b>12:01 / 4:30</b> ခလုတ်နဲ့ အချိန်စာရင်း ရွေးပါ။ အချိန်တစ်ခုချင်းစီ စာရင်း သီးသန့်ပါ။</li>
+        <li><b>◀ ရက်စွဲ ▶ ယနေ့</b> နဲ့ ရက်ရွေးပါ။ ယနေ့မဟုတ်တဲ့ ရက်ကိုကြည့်နေရင် အနီရောင်နဲ့ သတိပေးပါတယ်။</li>
+        <li><b>+ နာမည်</b> ကိုနှိပ်ပြီး ဖောက်သည်နာမည် ထည့်ပါ။ နာမည်အရေအတွက် ကန့်သတ်မရှိပါ။ နာမည်ကိုနှိပ်ရင် အဲဒီသူ့စာရင်းကို ဖွင့်ပါတယ်။ <b>အားလုံး</b> ကတော့ လူအားလုံးရဲ့ စုစုပေါင်းပါ။</li>
+      </ul></details>
+      <details><summary>၂။ ဂဏန်းထည့်နည်း</summary><ul>
+        <li>နာမည်ရွေးပြီး ဖောက်သည်ပို့တဲ့စာကို ကွက်ထဲ paste လုပ်ကာ <b>ထည့်မည်</b> နှိပ်ပါ။ စာကြောင်းတစ်ကြောင်းချင်း ခွဲဖတ်ပါတယ်။</li>
+        <li>တစ်ကြောင်းချင်း အမြန်ထည့်ချင်ရင် အောက်တန်းမှာ ဂဏန်း၊ ငွေ ရေးပြီး <b>+</b> (သို့ Enter) နှိပ်ပါ။ <b>R</b> ခလုတ်ကို နှိပ်ထားရင် ပြောင်းပြန်ပါပါတယ်။</li>
+        <li>ဂဏန်းကို မြန်မာ၊ အင်္ဂလိပ် ဘယ်လိုရေးရေး ရပါတယ်။ ခြားတာ <code>space . / - , :</code> ဘာနဲ့ခြားခြား၊ မခြားလည်း ရပါတယ်။</li>
+        <li><code>26 500</code> → 26 ကို 500</li>
+        <li><code>45 R 1000</code> ၊ <code>45R1000</code> → 45 နဲ့ 54 ကို 1000 စီ</li>
+        <li><code>56 500R500</code> → 56 ကို 500၊ 65 ကို 500 &nbsp;|&nbsp; <code>45 300R200</code> → 45 ကို 300၊ 54 ကို 200 (ပြောင်းပြန်ငွေ မတူရင်၊ R ကို ငွေနှစ်ခုကြား ကပ်ရေး)</li>
+        <li><code>70-73-75-R-5000</code> → ဂဏန်းအများ ဆက်ရေးလို့ရ၊ ငွေက အားလုံးအတူတူ၊ R ပါရင် ပြောင်းပြန်ပါ</li>
+        <li>အပူးဂဏန်း (11 22 ...) မှာ ပြောင်းပြန်မရှိတာမို့ တစ်ခါပဲ ထည့်ပါတယ်။</li>
+      </ul></details>
+      <details><summary>၃။ စကားလုံးတွေ (အတိုကောက်)</summary><ul>
+        <li><code>နက္ခ 1000</code> → 18 24 35 69 70 81 42 53 96 07</li>
+        <li><code>ပါဝါ 1000</code> → 05 16 27 38 49 50 61 72 83 94</li>
+        <li><code>အပူး 1000</code> → 00 11 22 33 44 55 66 77 88 99</li>
+        <li><code>ညီကို 1000</code> → 01 12 23 34 45 56 67 78 89 90 &nbsp;|&nbsp; <code>ညီကို R 1000</code> → ပြောင်းပြန်ပါ ၂၀ ခု</li>
+        <li><code>5ထိပ် 1000</code> → 50 မှ 59 &nbsp;|&nbsp; <code>3ပိတ် 1000</code> → 03 13 23 ... 93 (0 မှ 9 ရ)</li>
+        <li>ထိပ်၊ ပိတ်ကို ဂဏန်းအများကပ်ရေးလို့ရ။ <code>427 ထိပ် 1000</code> ၊ <code>6/7/8 ထိပ် 2500</code> ၊ <code>2-3-4 ပိတ် 200</code> ၊ <code>5 6 7 ထိပ် 100</code></li>
+        <li><code>1ပတ်</code> ၊ <code>1အပါ</code> ၊ <code>1ပါ 500</code> → 1 ပါတဲ့ ဂဏန်းအားလုံး (01 10 11 12 ... 91)။ 11 ကို နှစ်ကြိမ်ထည့်မလား ကိုတော့ "ထွက်ဂဏန်း တွက်ရန်" ထဲက ကွက်နဲ့ ရွေးပါ။</li>
+        <li><code>5ဘရိတ် 200</code> ၊ <code>5bk 200</code> → နှစ်လုံးပေါင်းလို့ 5 ရတဲ့ ၁၀ ခု (05 14 23 32 41 50 69 78 87 96)</li>
+        <li><code>ဆယ်ပြည့် 1000</code> → 10 20 30 40 50 60 70 80 90 00 &nbsp;|&nbsp; <code>ဆယ်ဖြစ် 1000</code> → နှစ်လုံးပေါင်း ၁၀ (00 19 28 37 46 55 64 73 82 91)</li>
+        <li><code>1397-ခွေပူး-1500</code> → ဂဏန်း ၄ လုံးရဲ့ ပတ်လည် ၁၂ ကွက် + အပူး ၄ ကွက် (၁၆ ခု) &nbsp;|&nbsp; <code>1397 ခွေ 1500</code> → အပူးမပါ ၁၂ ခု</li>
+      </ul></details>
+      <details><summary>၄။ နားမလည်တဲ့ စာကြောင်း</summary><ul>
+        <li>နားမလည်တဲ့ စာကြောင်းရှိရင် အနီရောင်နဲ့ အဲဒီစာကြောင်းကို ပြပါတယ်။ ဘာမှ မထည့်သေးပါဘူး။ စာကို ပြင်ပြီး ပြန်နှိပ်ပါ။</li>
+        <li><b>နားမလည်တာကို ကျော်ပြီး ကျန်တာ ထည့်မည်</b> ကိုနှိပ်ရင် နားမလည်တဲ့ စာကြောင်းတွေကို ကျော်ပြီး မှန်တဲ့ စာကြောင်းတွေကိုပဲ ထည့်ပါတယ်။</li>
+        <li>ဖောက်သည်ရဲ့ နာမည်၊ နှုတ်ဆက်စာတွေ ပါလာရင် အဲဒီစာကြောင်းက ကျော်သွားပါမယ်။ ငွေမပါတဲ့ ဂဏန်းလည်း ကျော်သွားပါမယ်။</li>
+      </ul></details>
+      <details><summary>၅။ ထွက်ဂဏန်း တွက်နည်း</summary><ul>
+        <li>"ထွက်ဂဏန်း တွက်ရန်" မှာ ထွက်ဂဏန်း ၂ လုံး၊ နုတ် (%)၊ ဆပေး (×) ထည့်ပါ။ ဖောက်သည်တစ်ယောက်ချင်းအတွက် % နဲ့ ဆပေးနှုန်း သီးသန့်လည်း ပေးလို့ရပါတယ် (နာမည်ရွေးပြီး ခေါင်းစဉ်အောက်က ကွက်၊ အလွတ်ထားရင် ပုံမှန်နှုန်းကို သုံးပါမယ်)။</li>
+        <li>ပေါ်လာတာတွေ: စုစုပေါင်း ထိုးကြေး၊ % နုတ်ငွေ၊ နုတ်ပြီး ကျန်ငွေ၊ ထွက်ဂဏန်းပေါ် တင်ထားငွေ၊ ဆပေးရမည့်ငွေ၊ <b>အမြတ်/အရှုံး = ကျန်ငွေ − ဆပေးငွေ</b></li>
+        <li><b>အားလုံး</b> ကိုနှိပ်ရင် လူတစ်ယောက်ချင်းစီရဲ့ ဇယားနဲ့ စုစုပေါင်းကို တစ်ပြိုင်နက် ကြည့်လို့ရပါတယ်။</li>
+        <li><b>★</b> က ငွေအများဆုံး တင်ထားတဲ့ ဂဏန်းပါ။ ငွေတူရင် တူတဲ့ဂဏန်းအားလုံး ★ ပါပါတယ်။ ဂဏန်းအသစ်ထည့်လို့ ပိုများသွားရင် အလိုအလျောက် ရွှေ့ပါတယ်။</li>
+      </ul></details>
+      <details><summary>၆။ ပြင်၊ ဖျက်</summary><ul>
+        <li>နာမည်ရွေးထားရင် အောက်က "စာရင်းများ" မှာ ထည့်ထားတဲ့ စာတစ်ခုချင်းစီ ဘေးက <b>×</b> နဲ့ ဖျက်လို့ရပါတယ်။</li>
+        <li>နာမည်ပြင်ချင်ရင် "ခေါင်းစဉ် (နာမည်)" ကွက်ထဲမှာ တိုက်ရိုက်ပြင်ပါ။ <b>နာမည်ဖျက်</b> ကို နှစ်ခါနှိပ်မှ ဖျက်ပါမယ် (အမှားမခံအောင်)။</li>
+      </ul></details>
+      <details><summary>၇။ တစ်နေ့တာ မှတ်တမ်း (History)</summary><ul>
+        <li>ဒီ Tab ထဲက "တစ်နေ့တာ မှတ်တမ်း" မှာ ရက်တိုင်းရဲ့ စုစုပေါင်း (12:01 နဲ့ 4:30 သီးသန့်စီ) ပြပါတယ်။ ထွက်ဂဏန်းထည့်ထားရင် အမြတ်/အရှုံးကိုလည်း ပြပါမယ်။</li>
+        <li>ကွက်ကိုနှိပ်ရင် အဲဒီနေ့ အဲဒီအချိန်စာရင်း ပွင့်ပါတယ်။</li>
+        <li>ရက်သစ်ဖွင့်ရင် ဖောက်သည်နာမည်၊ %၊ ဆပေးနှုန်းတွေ မနေ့ကအတိုင်း ပါလာပြီး ဂဏန်းတွေပဲ ရှင်းနေပါမယ်။</li>
+      </ul></details>
+      <details><summary>၈။ Key / အသုံးပြုခွင့်</summary><ul>
+        <li>App ကို ပထမဆုံးဖွင့်ရင် <b>Device ID</b> ပေါ်ပါမယ်။ <b>Copy</b> နှိပ်ပြီး Telegram ကနေ Developer ကို ပို့ကာ Activation key ဝယ်ပါ။</li>
+        <li>ရလာတဲ့ key ကို "Activation key ထည့်ရန်" ကွက်မှာ paste လုပ်ပြီး <b>Key ဖွင့်မည်</b> နှိပ်ပါ။ key က ဒီ Device ID စက်မှာပဲ သုံးလို့ရပါတယ်။</li>
+        <li>သက်တမ်းကုန်ခါနီးရင် ဒီ Tab ထဲက <b>Key သက်တမ်းတိုးရန်</b> ခလုတ်ကို နှိပ်ပြီး Telegram နဲ့ ဆက်သွယ်ပါ။ key အသစ်ရရင် ထပ်ထည့်ပါ။</li>
+      </ul></details>
+      <details><summary>၉။ သတိပြုရန်</summary><ul>
+        <li>စာရင်းအားလုံးကို ဒီဖုန်းရဲ့ browser/app ထဲမှာပဲ သိမ်းပါတယ်။ Browser data ရှင်းရင်၊ app ကို ဖျက်ရင် စာရင်းပျောက်ပါမယ်။ Device ID လည်း ပြောင်းသွားပါမယ်။</li>
+        <li>ထွက်ဂဏန်းရလဒ်ကို app က အလိုအလျောက် မယူပါ။ ကိုယ်တိုင် ထည့်ပေးရပါမယ်။</li>
+      </ul></details>
+    </section>
   </div>
   <div class="dfoot">Developer by - Ca.O</div>
 </aside>
@@ -357,7 +417,7 @@ if(!window.APP_CONFIG){
 }
 var cfg=window.APP_CONFIG,PK=cfg.LICENSE_PUBKEY;
 if(!PK)return; // key မထည့်ရသေးရင် လော့ခ်မလုပ်ပါ
-var TRIAL=cfg.TRIAL_DAYS!=null?+cfg.TRIAL_DAYS:0,TG=cfg.CONTACT_URL||'https://t.me/OAK_K7',TGN=cfg.CONTACT_NAME||'@OAK_K7';
+var TRIAL=cfg.TRIAL_DAYS!=null?+cfg.TRIAL_DAYS:0,TG=cfg.CONTACT_URL||'https://t.me/deve_CEO';
 /*LICFN*/
 function b64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
 async function check(code,id,nowMs){
@@ -388,7 +448,8 @@ async function status(){
   return {state:'locked',why:why};
 }
 var ov=null;
-function tgLink(){return TG+(TG.indexOf('?')<0?'?':'&')+'text='+encodeURIComponent('Key သက်တမ်း ဝယ်/တိုးလိုပါသည်။ Device ID: '+devId())}
+var TGI='<svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M21.6 3.2 2.6 10.5 8.3 12.7 18.2 6.3 10.4 14 10.4 19.6 13.3 16.6 17.9 19.8z"/></svg>';
+function tgLink(buy){return TG+(TG.indexOf('?')<0?'?':'&')+'text='+encodeURIComponent((buy?'Activation key ဝယ်လိုပါသည်။':'Key သက်တမ်းတိုးလိုပါသည်။')+' Device ID: '+devId())}
 // Key ထည့်တဲ့ အပိုင်း (လော့ခ်စာမျက်နှာနဲ့ Tab နှစ်နေရာလုံးမှာ သုံး)
 function keyForm(root){
   var inp=root.querySelector('.lic-in'),msg=root.querySelector('.lic-msg');
@@ -396,10 +457,10 @@ function keyForm(root){
   root.querySelector('.lic-go').onclick=async function(){var code=inp.value,r=await check(code,devId(),effNow());
     if(r.ok){set('app_license',code.trim());if(ov){ov.remove();ov=null}await refresh()}else msg.textContent=r.m};
 }
-function formHtml(why){
+function formHtml(why,buy){
   return '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center"><div style="font-size:12px;color:var(--mute)">Device ID</div><div class="devid">'+devId()+'</div>'+
   '<button class="lic-copy" style="margin-top:6px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">Copy</button></div>'+
-  '<a class="tg" href="'+tgLink()+'" target="_blank" rel="noopener">Key သက်တမ်းတိုးရန် · Telegram '+esc(TGN)+'</a>'+
+  '<a class="tg" href="'+tgLink(buy)+'" target="_blank" rel="noopener" aria-label="Telegram">'+TGI+'<span>'+(buy?'Activation key ဝယ်ရန်':'Key သက်တမ်းတိုးရန်')+'</span></a>'+
   '<label style="display:block;margin:14px 0 4px;font-size:13px;color:var(--mute)">Activation key ထည့်ရန်</label>'+
   '<textarea class="lic-in" rows="3" style="width:100%;font:13px/1.4 ui-monospace,monospace;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)"></textarea>'+
   '<button class="lic-go" style="width:100%;margin-top:8px;padding:12px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-weight:700;font-size:15px">Key ဖွင့်မည်</button>'+
@@ -413,7 +474,7 @@ function lockPanel(s){
   ov.style.cssText='position:fixed;inset:0;z-index:9999;background:var(--bg);overflow:auto;padding:22px 16px;font:15px/1.6 system-ui,"Noto Sans Myanmar","Myanmar Text",sans-serif;color:var(--ink)';
   ov.innerHTML='<div style="max-width:420px;margin:0 auto"><div style="text-align:center;margin-top:6px">'+LG+'</div>'+
    '<h1 style="font-size:20px;margin:12px 0 6px;text-align:center">အသုံးပြုခွင့် လိုအပ်ပါသည်</h1>'+
-   '<p style="color:var(--mute);margin:0 0 12px;text-align:center">အောက်က Device ID ကို Developer (Ca.O) ထံ ပို့ပြီး Activation key တောင်းပါ။</p>'+formHtml(s.why)+
+   '<p style="color:var(--mute);margin:0 0 12px;text-align:center">အောက်က Device ID ကို Developer (Ca.O) ထံ ပို့ပြီး Activation key တောင်းပါ။</p>'+formHtml(s.why,true)+
    '<div style="margin-top:18px;text-align:center;font-size:12px;color:var(--mute)">Developer by - Ca.O</div></div>';
   document.body.appendChild(ov);keyForm(ov);
 }
@@ -422,7 +483,7 @@ function renderBox(s){
   var el=document.getElementById('licbox');if(!el)return;
   var b=s.state==='active'?'<div class="badge ok">✅ အသုံးပြုခွင့်ရှိသည်'+(s.name?' · '+esc(s.name):'')+'<br>သက်တမ်း: <b>'+esc(fmtD(s.exp))+'</b></div>':
         s.state==='trial'?'<div class="badge ok">🕒 အစမ်းသုံးနေသည် · ကျန် <b>'+Math.ceil(s.left/864e5)+' ရက်</b></div>':'<div class="badge lock">🔒 Key မရှိပါ</div>';
-  el.className='';el.innerHTML=b+formHtml('');keyForm(el);
+  el.className='';el.innerHTML=b+formHtml('',s.state!=='active');keyForm(el);
 }
 async function refresh(){var s=await status();renderBox(s);if(s.state==='locked')lockPanel(s);return s}
 (async function(){await refresh();
