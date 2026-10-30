@@ -153,29 +153,32 @@ function topN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+k+i);return o}
 function endN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+i+k);return o}
 var TEN='10 20 30 40 50 60 70 80 90 00';
 function brk(k){var o=[],i,t;for(i=0;i<100;i++){t=pad(i);if((+t[0]+ +t[1])%10===k)o.push(t)}return o}
-var AMT='(\\d{1,3}(?:,\\d{3})+|\\d+)',SEP='[\\s=\\-*\\/:,()]*';
-var RE_SRC='(နက္ခ|ပါဝါ|အပူး|ညီကို)\\s*([rR])?'+SEP+AMT+'\\s*([rR])?'+
-  '|(\\d{1,10})[\\s.\\-,]*(အပါ|ပတ်)'+SEP+AMT+
-  '|(\\d{1,10})[\\s.\\-,]*(ဘရိတ်|bk)'+SEP+AMT+
-  '|(\\d{1,2}(?!\\d)(?:\\s*[.\\-]+\\s*\\d{1,2}(?!\\d))*)[\\s=\\-*\\/:,.]*([rR])?[\\s=\\-*\\/:,.]*'+AMT+'\\s*([rR])?'+
-  '|(\\d{2,10})[\\s.\\-,]*(ခွေပူး|ခွေ)'+SEP+AMT+
+var AMT='(\\d{1,3}(?:,\\d{3})+|\\d+)',SC='[\\s=\\-*\\/\\\\:,.;|_()~]',SEP=SC+'*',DS='[\\s.\\-,\\/_|]*',LS='(?:\\s*[.\\-,\\/_|]+\\s*|\\s+)';
+var RE_SRC='(နက္ခတ်|နက္ခ|ပါဝါ|အပူး|ညီကို)'+SEP+'([rR])?'+SEP+AMT+'\\s*([rR])?'+
+  '|(\\d{1,10})'+DS+'(အပါ|ပတ်|ပါ)'+SEP+AMT+
+  '|(\\d{1,10})'+DS+'(ဘရိတ်|ဘရိတ|bk)'+SEP+AMT+
+  '|(\\d{1,2}(?!\\d)(?:'+LS+'\\d{1,2}(?!\\d))*)'+SEP+'([rR])?'+SEP+AMT+'\\s*([rR])?'+
+  '|(\\d{2,10})'+DS+'(ခွေပူး|ခွေ)'+SEP+AMT+
   '|(ခွေပူး|ခွေ)'+SEP+'(\\d{2,10})'+SEP+AMT+
-  '|(\\d{1,10})[\\s.\\-,]*(ထိပ်|ပိတ်)'+SEP+AMT+
+  '|(\\d{1,10})'+DS+'(ထိပ်|ပိတ်)'+SEP+AMT+
   '|(ဆယ်ပြည့်|ဆယ်ဖြစ်)'+SEP+AMT+
   '|(ထိပ်|ပိတ်)'+SEP+'(\\d{1,10})'+SEP+AMT;
 function toA(x){return parseInt(String(x).replace(/,/g,''),10)}
-// ရိုးရိုးဂဏန်း + အထူးစာလုံး (နက္ခ ပါဝါ အပူး ညီကို အပါ/ပတ် ဘရိတ်/bk) ကို နားလည်သည်
-function parseText(txt){
-  txt=norm(txt);
+// ဂဏန်းမြန်မာ/အင်္ဂလိပ်၊ - . / , space အကုန်ရအောင် ဖတ်ရလွယ်အောင် အရင်ညှိ
+function norm2(t){return norm(String(t)).replace(/[–—−‑‒]/g,'-').replace(/[၊။]/g,' ').replace(/(\d)\s*[xX×✕]\s*(\d)/g,'$1 $2').replace(/ကျပ်|ဖိုး|\bks\b/gi,' ')}
+// စာကြောင်းတစ်ကြောင်းချင်း ခွဲဖတ် (တစ်ကြောင်းမှားလည်း အခြားကြောင်းတွေ မထိ)
+function parseLine(txt){
+  txt=norm2(txt);
   var re=new RegExp(RE_SRC,'gi'),items=[],bad=[],last=0,m,a,list,g;
-  function gap(t){t=t.replace(/[\s,.;:|၊။\-()（）\[\]]+/g,'');if(t)bad.push(t)}
+  function gap(t){t=t.replace(/[\s,.;:|၊။\-()（）\[\]\/\\_~=*]+/g,'');if(t)bad.push(t)}
   function add(l,a,g){l.forEach(function(x){items.push({n:parseInt(x,10),a:a,r:false,g:g})})}
   while((m=re.exec(txt))){
     gap(txt.slice(last,m.index));last=re.lastIndex;
     if(m[1]){
       a=toA(m[3]);if(!a){bad.push(m[0]);continue}
-      list=sp(GR[m[1]]);g=m[1];
-      if(m[1]==='ညီကို'&&(m[2]||m[4])){list=list.concat(list.map(rev));g+=' R'}
+      var k1=m[1]==='နက္ခတ်'?'နက္ခ':m[1];
+      list=sp(GR[k1]);g=k1;
+      if(k1==='ညီကို'&&(m[2]||m[4])){list=list.concat(list.map(rev));g+=' R'}
       add(list,a,g);
     }else if(m[5]){a=toA(m[7]);if(!a){bad.push(m[0]);continue}var o5=[];digs(m[5]).forEach(function(ch){o5=o5.concat(withDigit(+ch))});add(o5,a,m[5]+' '+m[6])}
     else if(m[8]){a=toA(m[10]);if(!a){bad.push(m[0]);continue}var o8=[];digs(m[8]).forEach(function(ch){o8=o8.concat(brk(+ch))});add(o8,a,m[8]+' '+m[9])}
@@ -192,6 +195,8 @@ function parseText(txt){
   gap(txt.slice(last));
   return {items:items,bad:bad};
 }
+// မှန်တဲ့စာကြောင်းတွေပဲ items ထဲဝင်၊ နားမလည်တဲ့ စာကြောင်းတစ်ကြောင်းလုံးကို bad ထဲ ထည့်ပြ
+function parseText(txt){var items=[],bad=[];String(txt).split(/\r?\n/).forEach(function(l){if(!l.trim())return;var r=parseLine(l);if(r.bad.length)bad.push(l.trim());else items=items.concat(r.items)});return {items:items,bad:bad}}
 function parts(it){var p=[[it.n,it.a]];if(it.r){var s=pad(it.n),rv=+(s[1]+s[0]);if(rv!==it.n)p.push([rv,it.a])}return p}
 function tot(entries){var t=[],s=0,i;for(i=0;i<100;i++)t[i]=0;
   entries.forEach(function(e){e.items.forEach(function(it){parts(it).forEach(function(p){t[p[0]]+=p[1];s+=p[1]})})});return {t:t,sum:s}}
@@ -199,7 +204,7 @@ function tot(entries){var t=[],s=0,i;for(i=0;i<100;i++)t[i]=0;
 function doAdd(txt,skip){
   var c=cur();if(!c){say('နာမည်တစ်ခု အရင်ရွေးပါ',1);return false}
   var P=parseText(txt);
-  if(P.bad.length&&!skip){pending=txt;$('skip').hidden=false;say('နားမလည်သော စာသား: '+P.bad.join(' | ')+' — ပြင်ပါ၊ ဒါမှမဟုတ် ကျော်ထည့်ပါ။',1);return false}
+  if(P.bad.length&&!skip){pending=txt;$('skip').hidden=false;say('နားမလည်သော စာကြောင်း: '+P.bad.join(' | ')+' — ပြင်ပါ၊ ဒါမှမဟုတ် ကျော်ထည့်ပါ။',1);return false}
   if(!P.items.length){say('ထည့်စရာ ဂဏန်း မတွေ့ပါ',1);return false}
   c.entries.push({id:uid(),raw:txt.trim(),items:P.items});
   $('skip').hidden=true;pending='';
@@ -312,7 +317,7 @@ setSess('1');
 })();
 </script>
 <script>
-/* LICENSE: Device ID + developer-signed activation code (ECDSA P-256) */
+/* LICENSE: trial + Device ID + developer-signed key (ECDSA P-256) */
 (function(){
 if(!window.APP_CONFIG){
   var eb=document.createElement('div');
@@ -322,17 +327,18 @@ if(!window.APP_CONFIG){
 }
 var cfg=window.APP_CONFIG,PK=cfg.LICENSE_PUBKEY;
 if(!PK)return; // key မထည့်ရသေးရင် လော့ခ်မလုပ်ပါ
+var TRIAL=cfg.TRIAL_DAYS!=null?+cfg.TRIAL_DAYS:3,TG=cfg.CONTACT_URL||'https://t.me/OAK_K7',TGN=cfg.CONTACT_NAME||'@OAK_K7';
 /*LICFN*/
 function b64u(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
-async function check(code,id){
+async function check(code,id,nowMs){
   try{var p=String(code).trim().split('.');if(p.length!==2)return {ok:false,m:'ကုဒ်ပုံစံ မမှန်ပါ'};
     var key=await crypto.subtle.importKey('jwk',PK,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
     var payload=b64u(p[0]);
     if(!await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},key,b64u(p[1]),payload))return {ok:false,m:'ကုဒ် မမှန်ပါ'};
     var t=new TextDecoder().decode(payload).split('|');
     if(t[0]!==id)return {ok:false,m:'ဒီကုဒ်က ဒီစက်အတွက် မဟုတ်ပါ'};
-    if(t[1]!=='0'&&new Date(t[1]+'T23:59:59')<new Date())return {ok:false,m:'သက်တမ်းကုန်သွားပါပြီ ('+t[1]+')'};
-    return {ok:true,exp:t[1]};
+    if(t[1]!=='0'&&new Date(t[1]+'T23:59:59').getTime()<(nowMs||Date.now()))return {ok:false,m:'သက်တမ်းကုန်သွားပါပြီ ('+t[1]+')'};
+    return {ok:true,exp:t[1],name:t[2]||''};
   }catch(e){return {ok:false,m:'စစ်ဆေး၍မရပါ'}}
 }
 /*LICFNEND*/
@@ -341,30 +347,56 @@ function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function devId(){var id=get('app_device_id');if(id)return id;
   var A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(10));id='';
   for(var i=0;i<10;i++){id+=A[r[i]%A.length];if(i===4)id+='-'}set('app_device_id',id);return id}
-var ov;
-function show(msg){
-  if(!ov){var lgEl=document.querySelector('h1 svg'),LG=lgEl?lgEl.outerHTML.replace('width="30" height="30"','width="76" height="76"').replace('margin-right:8px','margin:0'):'';ov=document.createElement('div');
-    ov.style.cssText='position:fixed;inset:0;z-index:9999;background:var(--bg);overflow:auto;padding:24px 16px;font:15px/1.6 system-ui,"Noto Sans Myanmar","Myanmar Text",sans-serif;color:var(--ink)';
-    ov.innerHTML='<div style="max-width:420px;margin:0 auto"><div style="text-align:right;font-size:11px;color:var(--mute)">Developer by - Ca.O</div>'+
-    '<div style="text-align:center;margin-top:8px">'+LG+'</div><h1 style="font-size:20px;margin:14px 0 6px;text-align:center">အသုံးပြုခွင့် လိုအပ်ပါသည်</h1>'+
-    '<p style="color:var(--mute);margin:0 0 14px">အောက်က Device ID ကို Developer (Ca.O) ထံ ပို့ပြီး Activation code တောင်းပါ။</p>'+
-    '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center"><div style="font-size:12px;color:var(--mute)">Device ID</div>'+
-    '<div id="lic-id" style="font:700 26px/1.4 ui-monospace,monospace;letter-spacing:.06em;user-select:all"></div>'+
-    '<button id="lic-copy" style="margin-top:6px">Copy</button></div>'+
-    '<label for="lic-in" style="display:block;margin:16px 0 4px;font-size:13px;color:var(--mute)">Activation code</label>'+
-    '<textarea id="lic-in" rows="4" style="width:100%;font:13px/1.4 ui-monospace,monospace;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)"></textarea>'+
-    '<button id="lic-go" style="width:100%;margin-top:8px;padding:12px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-weight:700;font-size:15px">အသုံးပြုခွင့် ဖွင့်မည်</button>'+
-    '<div id="lic-msg" style="min-height:22px;margin-top:8px;color:var(--acc);font-size:14px"></div></div>';
-    document.body.appendChild(ov);var id=devId();ov.querySelector('#lic-id').textContent=id;
-    ov.querySelector('#lic-copy').onclick=function(){try{navigator.clipboard.writeText(id);this.textContent='Copied ✓'}catch(e){this.textContent='ဖိနှိပ်ကူးပါ'}};
-    ov.querySelector('#lic-go').onclick=async function(){var code=ov.querySelector('#lic-in').value,r=await check(code,devId());
-      if(r.ok){set('app_license',code.trim());ov.remove();ov=null}else ov.querySelector('#lic-msg').textContent=r.m};
-  }
-  ov.querySelector('#lic-msg').textContent=msg||'';
+// နာရီကို နောက်ပြန်ရွှေ့ပြီး လိမ်တာကို တားဖို့ အကြိမ်ဆုံးမြင်ဖူးတဲ့အချိန်ကို မှတ်ထား
+function effNow(){var n=Date.now(),l=+get('app_last_seen')||0;if(l>n)n=l;set('app_last_seen',String(n));return n}
+function fmtD(e){return e==='0'?'အကန့်အသတ်မရှိ':e}
+async function status(){
+  var now=effNow(),c=get('app_license'),why='';
+  if(c){var r=await check(c,devId(),now);if(r.ok)return {state:'active',exp:r.exp,name:r.name};why=r.m}
+  if(TRIAL>0){var st=get('app_trial_start');if(!st){st=String(now);set('app_trial_start',st)}
+    var left=TRIAL*864e5-(now-(+st));
+    if(left>0)return {state:'trial',left:left};
+    return {state:'locked',trialUsed:true,why:why}}
+  return {state:'locked',trialUsed:false,why:why};
 }
-(async function(){var c=get('app_license');
-  if(!c){show();return}
-  var r=await check(c,devId());if(!r.ok)show(r.m)})();
+var ov=null,btn=null,cur=null;
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function setBtn(s){if(!btn)return;btn.textContent=s.state==='trial'?'☰ Menu · အစမ်း '+Math.ceil(s.left/864e5)+' ရက်':'☰ Menu'}
+function panel(mode,s){
+  if(ov){ov.remove();ov=null}
+  var id=devId(),locked=mode==='locked',lg=document.querySelector('h1 svg'),
+  LG=lg?lg.outerHTML.replace('width="30" height="30"','width="64" height="64"').replace('margin-right:8px','margin:0'):'',
+  stat='',title=locked?(s.trialUsed?'အစမ်းသုံးခွင့် ကုန်ဆုံးပါပြီ':'အသုံးပြုခွင့် လိုအပ်ပါသည်'):'Menu',
+  note=locked?(s.trialUsed?'ဤ Device ID သည် အစမ်းသုံးခွင့် ('+TRIAL+' ရက်) အသုံးပြုပြီးသား ဖြစ်နေပါသည်။ ဆက်လက်အသုံးပြုလိုပါက Key သက်တမ်း ဝယ်ယူပါ။':'အောက်က Device ID ကို Developer (Ca.O) ထံ ပို့ပြီး Activation key တောင်းပါ။'):'';
+  if(!locked){stat=s.state==='active'?'<div style="padding:10px;border-radius:10px;background:#e3f4e8;color:#1f6b3a;margin-bottom:10px">✅ အသုံးပြုခွင့်ရှိသည်'+(s.name?' · '+esc(s.name):'')+'<br>သက်တမ်း: <b>'+esc(fmtD(s.exp))+'</b></div>':'<div style="padding:10px;border-radius:10px;background:#fff3d6;color:#7a5200;margin-bottom:10px">🕒 အစမ်းသုံးနေသည် · ကျန် <b>'+Math.ceil(s.left/864e5)+' ရက်</b></div>'}
+  var tgl=TG+(TG.indexOf('?')<0?'?':'&')+'text='+encodeURIComponent('Key သက်တမ်း ဝယ်/တိုးလိုပါသည်။ Device ID: '+id);
+  ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;background:var(--bg);overflow:auto;padding:22px 16px;font:15px/1.6 system-ui,"Noto Sans Myanmar","Myanmar Text",sans-serif;color:var(--ink)';
+  ov.innerHTML='<div style="max-width:420px;margin:0 auto"><div style="text-align:right;font-size:11px;color:var(--mute)">Developer by - Ca.O</div>'+
+   '<div style="text-align:center;margin-top:6px">'+LG+'</div>'+
+   '<h1 style="font-size:20px;margin:12px 0 6px;text-align:center">'+title+'</h1>'+
+   (note?'<p style="color:var(--mute);margin:0 0 12px;text-align:center">'+note+'</p>':'')+stat+
+   '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center"><div style="font-size:12px;color:var(--mute)">Device ID</div>'+
+   '<div style="font:700 26px/1.4 ui-monospace,monospace;letter-spacing:.06em;user-select:all">'+id+'</div>'+
+   '<button id="lic-copy" style="margin-top:6px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">Copy</button></div>'+
+   '<a id="lic-tg" href="'+tgl+'" target="_blank" rel="noopener" style="display:block;margin-top:12px;padding:13px;border-radius:10px;background:#229ed9;color:#fff;font-weight:700;text-align:center;text-decoration:none">'+(locked?'Key ဝယ်ယူရန်':'Key သက်တမ်းတိုးရန်')+' · Telegram '+esc(TGN)+'</a>'+
+   '<label for="lic-in" style="display:block;margin:16px 0 4px;font-size:13px;color:var(--mute)">Activation key ရှိပြီးသားဆိုရင် ဒီမှာထည့်ပါ</label>'+
+   '<textarea id="lic-in" rows="3" style="width:100%;font:13px/1.4 ui-monospace,monospace;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)"></textarea>'+
+   '<button id="lic-go" style="width:100%;margin-top:8px;padding:12px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-weight:700;font-size:15px">Key ဖွင့်မည်</button>'+
+   '<div id="lic-msg" style="min-height:22px;margin-top:8px;color:var(--acc);font-size:14px">'+esc(s.why||'')+'</div>'+
+   (locked?'':'<button id="lic-close" style="width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)">ပိတ်မည်</button>')+'</div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#lic-copy').onclick=function(){try{navigator.clipboard.writeText(id);this.textContent='Copied ✓'}catch(e){this.textContent='ဖိနှိပ်ကူးပါ'}};
+  ov.querySelector('#lic-go').onclick=async function(){var code=ov.querySelector('#lic-in').value,r=await check(code,devId(),effNow());
+    if(r.ok){set('app_license',code.trim());ov.remove();ov=null;await refresh()}else ov.querySelector('#lic-msg').textContent=r.m};
+  var cl=ov.querySelector('#lic-close');if(cl)cl.onclick=function(){ov.remove();ov=null};
+}
+async function refresh(){cur=await status();setBtn(cur);if(cur.state==='locked'&&!(ov&&ov.dataset.l))panel('locked',cur);return cur}
+function addBtn(){var m=document.querySelector('main');if(!m||btn)return;btn=document.createElement('button');
+  btn.id='menubtn';btn.style.cssText='position:absolute;top:14px;right:0;padding:4px 10px;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer';
+  btn.onclick=async function(){var s=await status();cur=s;panel(s.state==='locked'?'locked':'menu',s)};m.appendChild(btn)}
+(async function(){addBtn();await refresh();
+  setInterval(async function(){var s=await status();cur=s;setBtn(s);if(s.state==='locked'&&!ov)panel('locked',s)},60000)})();
 })();
 </script>
 </body>

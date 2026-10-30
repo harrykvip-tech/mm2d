@@ -6,8 +6,10 @@ body{margin:0;padding:14px;background:#f4efe6;color:#2a2118;font:15px/1.6 system
 main{max-width:520px;margin:auto}.card{background:#fffdf8;border:1px solid #e2d8c6;border-radius:14px;padding:12px;margin-bottom:12px}
 h1{font-size:19px;margin:4px 0 10px}h2{font-size:14px;margin:0 0 8px}label{font-size:12px;color:#7a6b5a;display:block;margin:8px 0 3px}
 input,select,textarea{width:100%;font:inherit;font-size:15px;padding:9px;border:1px solid #e2d8c6;border-radius:10px;background:#f4efe6;color:#2a2118}
-textarea{font:12px/1.4 ui-monospace,monospace}button{font:inherit;padding:9px 12px;border:1px solid #cfc3ad;background:#fffdf8;border-radius:10px;margin-top:8px;cursor:pointer}
+textarea{font:12px/1.4 ui-monospace,monospace}button{font:inherit;padding:8px 11px;border:1px solid #cfc3ad;background:#fffdf8;border-radius:10px;margin-top:8px;cursor:pointer}
 button.go{background:#b3261e;color:#fff;border:0;font-weight:700;width:100%}.warn{color:#b3261e;font-size:13px}.m{font-size:13px;color:#7a6b5a}
+.row{display:flex;gap:8px}.row>*{flex:1}.q{display:flex;flex-wrap:wrap;gap:6px}.q button{margin:0;padding:5px 10px;font-size:13px}
+.it{border-top:1px solid #e2d8c6;padding:8px 0;font-size:13px}.it b{font-size:14px}
 </style></head><body><main>
 <h1>Admin - Developer by Ca.O</h1>
 <div class="card"><h2>၁။ Key ထုတ်ရန် (တစ်ကြိမ်ပဲ လုပ်ပါ)</h2>
@@ -15,25 +17,36 @@ button.go{background:#b3261e;color:#fff;border:0;font-weight:700;width:100%}.war
 <label>Public key (config.js ထဲ LICENSE_PUBKEY: အစားထိုးထည့်ရန်)</label><textarea id="pub" rows="3" readonly></textarea>
 <button id="cpub">Public key ကူးမည်</button>
 <button id="dl">Private key ဖိုင် ဒေါင်းလုဒ်</button>
-<p class="warn">Private key ဖိုင်ကို လုံခြုံစွာ သိမ်းပါ။ GitHub ပေါ်မတင်ပါနဲ့၊ တစ်ယောက်ယောက်ကို မပေးပါနဲ့။ ပျောက်ရင် လူတိုင်းအတွက် key အသစ်နဲ့ ပြန်လုပ်ရမယ်။</p></div>
-<div class="card"><h2>၂။ Activation code ထုတ်ပေးရန်</h2>
+<p class="warn">Private key ဖိုင်ကို လုံခြုံစွာ သိမ်းပါ။ GitHub ပေါ်မတင်ပါနဲ့၊ တစ်ယောက်ယောက်ကို မပေးပါနဲ့။ ပျောက်ရင် လူတိုင်းအတွက် key အသစ်နဲ့ ပြန်လုပ်ရမယ်။ (ယခင် key ထုတ်ပြီးသားဆိုရင် ဒီအပိုင်းကို ထပ်မလုပ်ပါနဲ့)</p></div>
+<div class="card"><h2>၂။ Activation key ထုတ်ပေးရန်</h2>
 <label>Private key (ဖိုင်ရွေးပါ၊ သို့ ဘေးက paste)</label><input type="file" id="pf" accept=".json,application/json"><textarea id="priv" rows="2" placeholder='{"kty":"EC",...}'></textarea>
+<label>နာမည် / မှတ်ချက် (customer တစ်ယောက်ချင်း၊ အကန့်အသတ်မရှိ ထည့်နိုင်)</label><input id="nm" placeholder="ကိုကျော်">
 <label>Customer ပို့တဲ့ Device ID</label><input id="did" placeholder="ABCDE-FGHJK" autocapitalize="characters">
-<label>သက်တမ်း</label><select id="exp"><option value="7">၇ ရက်</option><option value="30" selected>၃၀ ရက်</option><option value="90">၉၀ ရက်</option><option value="365">၁ နှစ်</option><option value="0">သက်တမ်းမကုန် (အမြဲ)</option></select>
-<button class="go" id="sign">Activation code ထုတ်မည်</button>
-<label>Activation code (customer ကို ပို့ပါ)</label><textarea id="out" rows="4" readonly></textarea><button id="cout">ကုဒ်ကူးမည်</button>
+<label>သက်တမ်း (စိတ်ကြိုက်)</label>
+<div class="row"><input id="dn" type="number" min="1" value="30"><select id="du"><option value="d">ရက်</option><option value="m">လ</option><option value="y">နှစ်</option></select></div>
+<div class="q" style="margin-top:6px"><button data-n="7" data-u="d">၇ ရက်</button><button data-n="30" data-u="d">၃၀ ရက်</button><button data-n="3" data-u="m">၃ လ</button><button data-n="6" data-u="m">၆ လ</button><button data-n="1" data-u="y">၁ နှစ်</button></div>
+<label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="unl" style="width:auto"> အကန့်အသတ်မရှိ (သက်တမ်းမကုန်)</label>
+<button class="go" id="sign">Activation key ထုတ်မည်</button>
+<label>Activation key (customer ကို Telegram နဲ့ ပို့ပါ)</label><textarea id="out" rows="4" readonly></textarea><button id="cout">Key ကူးမည်</button>
 <div class="m" id="msg"></div></div>
+<div class="card"><h2>၃။ ထုတ်ပေးပြီးသား စာရင်း</h2><div id="list" class="m">မရှိသေးပါ</div><button id="clr">စာရင်းဖျက်မည်</button></div>
 <script>
 var $=function(i){return document.getElementById(i)},priv=null;
 function b64u(buf){var a=new Uint8Array(buf),s='';for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 /*SIGNFN*/
-async function signCode(privJwk,id,exp){
+async function signCode(privJwk,id,e,name){
   var key=await crypto.subtle.importKey('jwk',privJwk,{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
-  var e='0';if(exp>0){var d=new Date();d.setDate(d.getDate()+exp);e=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-  var payload=new TextEncoder().encode(id+'|'+e),sig=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},key,payload);
+  var nm=String(name||'').replace(/[|\r\n]/g,' ').trim().slice(0,40);
+  var payload=new TextEncoder().encode(id+'|'+e+'|'+nm),sig=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},key,payload);
   return b64u(payload)+'.'+b64u(sig);
 }
+function expDate(unl,n,u){if(unl)return '0';var d=new Date();if(u==='d')d.setDate(d.getDate()+n);else if(u==='m')d.setMonth(d.getMonth()+n);else d.setFullYear(d.getFullYear()+n);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 /*SIGNFNEND*/
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function issued(){try{return JSON.parse(localStorage.getItem('issued')||'[]')}catch(e){return[]}}
+function drawList(){var L=issued();$('list').innerHTML=L.length?L.map(function(x,i){return '<div class="it"><b>'+esc(x.name||'(နာမည်မရှိ)')+'</b> · '+esc(x.id)+'<br>သက်တမ်း: '+(x.exp==='0'?'အကန့်အသတ်မရှိ':esc(x.exp))+' · ထုတ်သည့်ရက် '+esc(x.at)+'<br><button data-i="'+i+'">ဒီ key ကူးမည်</button></div>'}).join(''):'မရှိသေးပါ';
+  $('list').querySelectorAll('button').forEach(function(b){b.onclick=function(){var k=issued()[+b.dataset.i].code;$('out').value=k;try{navigator.clipboard.writeText(k)}catch(e){}b.textContent='ကူးပြီး ✓'}})}
 $('gen').onclick=async function(){
   var kp=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
   var pu=await crypto.subtle.exportKey('jwk',kp.publicKey),pr=await crypto.subtle.exportKey('jwk',kp.privateKey);
@@ -43,11 +56,18 @@ $('gen').onclick=async function(){
 $('cpub').onclick=function(){$('pub').select();try{navigator.clipboard.writeText($('pub').value)}catch(e){document.execCommand('copy')}};
 $('dl').onclick=function(){if(!$('priv').value)return;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('priv').value],{type:'application/json'}));a.download='ca-o-private-key.json';a.click()};
 $('pf').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$('priv').value=r.result};r.readAsText(f)};
+document.querySelectorAll('.q button').forEach(function(b){b.onclick=function(){$('dn').value=b.dataset.n;$('du').value=b.dataset.u;$('unl').checked=false}});
 $('sign').onclick=async function(){
-  try{var pr=JSON.parse($('priv').value),id=$('did').value.trim().toUpperCase();
+  try{var pr=JSON.parse($('priv').value),id=$('did').value.trim().toUpperCase().replace(/\s+/g,'');
     if(!/^[A-Z2-9]{5}-[A-Z2-9]{5}$/.test(id)){$('msg').textContent='Device ID ပုံစံ မမှန်ပါ (ABCDE-FGHJK)';return}
-    $('out').value=await signCode(pr,id,parseInt($('exp').value,10));$('msg').textContent='ပြီးပါပြီ။ ဒီကုဒ်က '+id+' စက်မှာပဲ သုံးလို့ရမယ်။';
+    var n=parseInt($('dn').value,10),unl=$('unl').checked;
+    if(!unl&&!(n>0)){$('msg').textContent='သက်တမ်း (ရက်/လ/နှစ်) ထည့်ပါ';return}
+    var e=expDate(unl,n,$('du').value),nm=$('nm').value,code=await signCode(pr,id,e,nm);
+    $('out').value=code;$('msg').textContent='ပြီးပါပြီ။ '+(nm?nm+' · ':'')+id+' စက်မှာပဲ သုံးလို့ရမယ်။ သက်တမ်း: '+(e==='0'?'အကန့်အသတ်မရှိ':e);
+    var L=issued();L.unshift({name:nm,id:id,exp:e,code:code,at:new Date().toISOString().slice(0,10)});try{localStorage.setItem('issued',JSON.stringify(L))}catch(x){}drawList();
   }catch(e){$('msg').textContent='အမှား: Private key မမှန်ပါ'}
 };
 $('cout').onclick=function(){$('out').select();try{navigator.clipboard.writeText($('out').value)}catch(e){document.execCommand('copy')}};
+$('clr').onclick=function(){if(this.dataset.a!=='1'){this.dataset.a='1';this.textContent='ထပ်နှိပ်ရင် ဖျက်မည်';return}try{localStorage.removeItem('issued')}catch(e){}this.dataset.a='';this.textContent='စာရင်းဖျက်မည်';drawList()};
+drawList();
 </script></main></body></html>
