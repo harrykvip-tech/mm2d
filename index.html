@@ -60,6 +60,8 @@ main{position:relative}.dev{position:absolute;top:-6px;right:0;font-size:11px;co
 <div class="seg" role="group" aria-label="အချိန်ရွေး">
   <button id="s1" aria-pressed="true">12:01</button><button id="s2" aria-pressed="false">4:30</button>
 </div>
+<div class="seg" id="daybar"><button id="dprev" aria-label="မနေ့">◀</button><input type="date" id="day" aria-label="ရက်စွဲ" style="flex:3;min-width:0;text-align:center"><button id="dnext" aria-label="နက်ဖြန်">▶</button><button id="dtoday">ယနေ့</button></div>
+<div class="msg" id="daynote" style="margin:-4px 0 8px;color:var(--acc);font-weight:600"></div>
 <div class="names" id="names"></div>
 <div class="card" id="newc" hidden>
   <label for="nn">ဖောက်သည်နာမည် အသစ်</label>
@@ -70,10 +72,6 @@ main{position:relative}.dev{position:absolute;top:-6px;right:0;font-size:11px;co
   <h2>ဂဏန်းထည့်ရန်</h2>
   <textarea id="inp" rows="4" placeholder="customer ပို့တဲ့စာကို တစ်ခုလုံး paste လုပ်ပါ (စာကြောင်းရှည်လည်း ရ၊ တစ်ကြောင်းချင်းလည်း ရ)&#10;26 500 45R1000 07 r 2000&#10;12 300"></textarea>
   <button class="go" id="add">ထည့်မည်</button>
-  <div style="display:flex;gap:6px;margin-top:6px"><label class="link" for="cam" style="display:block;text-align:center;padding:10px 8px;border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent;flex:1">ကင်မရာနဲ့ ရိုက်မည်</label><label class="link" id="imgbtn" for="img" style="display:block;text-align:center;padding:10px 8px;border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent;flex:1">ပုံ / Screenshot ရွေးမည်</label></div>
-  <input type="file" id="cam" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)">
-  <input type="file" id="img" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)">
-  <div class="msg" id="imgstat" style="font-size:14px"></div>
   <details style="margin-top:8px"><summary style="font-size:13px;color:var(--mute);cursor:pointer">အထူးစာလုံးများ ကြည့်ရန်</summary><div id="help" class="msg" style="line-height:1.8"></div></details>
   <button class="link" id="skip" hidden style="margin-top:6px;width:100%">နားမလည်တာကို ကျော်ပြီး ကျန်တာ ထည့်မည်</button>
   <div class="quick">
@@ -104,12 +102,16 @@ main{position:relative}.dev{position:absolute;top:-6px;right:0;font-size:11px;co
   <label class="chk"><input type="checkbox" id="dup"> ၁ အပါ/ပတ် စသည်မှာ 11 (အပူး) ကို နှစ်ကြိမ်ထည့်ရန် (စုစုပေါင်း ၂၀ ခု)</label>
   <div id="res" style="margin-top:8px"></div>
 </div>
+<details class="card" id="histcard"><summary style="cursor:pointer;font-weight:600">နေ့စဉ် မှတ်တမ်း (ရက်အလိုက်)</summary><div id="histlist" class="tw" style="margin-top:8px"></div></details>
 </main>
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
 var sess='1',D,pending='',armed=null,qR=false;
-function key(){return 'ledger2d_v2_'+sess}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+var day=ymd(new Date());
+function key(){return 'ledger2d_d_'+day+'_'+sess}
+function allKeys(){var o=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i),m=/^ledger2d_d_(\d{4}-\d{2}-\d{2})_([12])$/.exec(k);if(m)o.push({k:k,d:m[1],s:m[2]})}}catch(e){}return o}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function num(v){var x=parseFloat(String(v).replace(/,/g,''));return isNaN(x)?0:x}
@@ -119,10 +121,25 @@ function money(n){return (n<0?'−':'')+fmt(Math.abs(n))}
 function compact(n){if(!n)return '';if(n>=1e6)return +(n/1e6).toFixed(2)+'M';if(n>=1e3)return +(n/1e3).toFixed(n>=1e4?1:2)+'k';return String(n)}
 var BD='၀၁၂၃၄၅၆၇၈၉';
 function norm(s){return s.replace(/[၀-၉]/g,function(c){return BD.indexOf(c)})}
-function load(){var s=null;try{s=JSON.parse(localStorage.getItem(key()))}catch(e){}
+function load(){var s=null,mig=false;try{s=JSON.parse(localStorage.getItem(key()))}catch(e){}
+  if(!s){
+    try{if(day===ymd(new Date())&&!localStorage.getItem('ledger_mig_'+sess)){var old=JSON.parse(localStorage.getItem('ledger2d_v2_'+sess));localStorage.setItem('ledger_mig_'+sess,'1');if(old&&old.custs){s=old;mig=true}}}catch(e){}
+    if(!s){var pv=allKeys().filter(function(x){return x.s===sess&&x.d<day}).sort(function(a,b){return a.d<b.d?1:-1})[0];
+      if(pv){try{var p=JSON.parse(localStorage.getItem(pv.k));s={custs:(p.custs||[]).map(function(c){return {id:c.id,name:c.name,pct:c.pct||'',mul:c.mul||'',entries:[]}}),pct:p.pct,mul:p.mul,dup:p.dup,win:'',sel:'all'}}catch(e){}}}
+  }
   D=s||{};D.custs=D.custs||[];D.pct=D.pct==null?'15':D.pct;D.mul=D.mul==null?'85':D.mul;D.win=D.win||'';D.sel=D.sel||'all';D.dup=D.dup==null?true:D.dup;
-  if(D.sel!=='all'&&!D.custs.some(function(c){return c.id===D.sel}))D.sel='all'}
-function save(){try{localStorage.setItem(key(),JSON.stringify(D))}catch(e){}}
+  if(D.sel!=='all'&&!D.custs.some(function(c){return c.id===D.sel}))D.sel='all';
+  if(mig)save()}
+function save(){try{localStorage.setItem(key(),JSON.stringify(D))}catch(e){}try{renderHistory()}catch(e){}}
+function sumL(L){var tw=0,net=0,has=false,w=(L.win||'').length===2?parseInt(L.win,10):-1;
+  (L.custs||[]).forEach(function(c){var T=tot(c.entries||[]),p=(c.pct!==''&&c.pct!=null)?num(c.pct):num(L.pct==null?15:L.pct),m=(c.mul!==''&&c.mul!=null)?num(c.mul):num(L.mul==null?85:L.mul);
+    tw+=T.sum;if(w>=0){net+=T.sum-T.sum*p/100-T.t[w]*m;has=true}});return {sum:tw,net:net,has:has,w:w}}
+function renderHistory(){
+  var days={};allKeys().forEach(function(x){try{var r=sumL(JSON.parse(localStorage.getItem(x.k)));if(r.sum>0)(days[x.d]=days[x.d]||{})[x.s]=r}catch(e){}});
+  var ds=Object.keys(days).sort().reverse(),h='<table><thead><tr><th>ရက်စွဲ</th><th>12:01</th><th>4:30</th></tr></thead><tbody>';
+  ds.forEach(function(d){h+='<tr><td><b>'+d+'</b></td>'+['1','2'].map(function(k){var r=days[d][k];
+    return '<td data-act="goday" data-d="'+d+'" data-s="'+k+'" style="cursor:pointer">'+(r?fmt(r.sum)+(r.has?'<br><small class="'+(r.net>=0?'pos':'neg')+'">'+(r.net>=0?'+':'')+money(r.net)+' ('+pad(r.w)+')</small>':''):'-')+'</td>'}).join('')+'</tr>'});
+  $('histlist').innerHTML=ds.length?h+'</tbody></table><div class="msg">ကွက်ကိုနှိပ်ရင် အဲဒီနေ့စာရင်း ပွင့်မယ်။ အစိမ်း/အနီက ထွက်ဂဏန်းထည့်ထားမှ အမြတ်/အရှုံး ပြတာ။</div>':'<div class="msg">မှတ်တမ်းမရှိသေးပါ</div>'}
 function cur(){for(var i=0;i<D.custs.length;i++)if(D.custs[i].id===D.sel)return D.custs[i];return null}
 function say(m,err){$('msg').textContent=m;$('msg').className='msg'+(err?' err':'')}
 
@@ -131,6 +148,9 @@ var GR={'နက္ခ':'18 24 35 69 70 81 42 53 96 07','ပါဝါ':'05 16 27 
 function sp(x){return x.split(' ')}
 function rev(x){return x[1]+x[0]}
 function withDigit(k){var o=[],i,t;for(i=0;i<100;i++){t=pad(i);if(+t[0]===k||+t[1]===k)o.push(t)}if(!D||D.dup)o.push(''+k+k);return o}
+function topN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+k+i);return o}
+function endN(k){var o=[],i;for(i=0;i<10;i++)o.push(''+i+k);return o}
+var TEN='10 20 30 40 50 60 70 80 90 00';
 function brk(k){var o=[],i,t;for(i=0;i<100;i++){t=pad(i);if((+t[0]+ +t[1])%10===k)o.push(t)}return o}
 var AMT='(\\d{1,3}(?:,\\d{3})+|\\d+)',SEP='[\\s=\\-*\\/:,()]*';
 var RE_SRC='(နက္ခ|ပါဝါ|အပူး|ညီကို)\\s*([rR])?'+SEP+AMT+'\\s*([rR])?'+
@@ -138,7 +158,9 @@ var RE_SRC='(နက္ခ|ပါဝါ|အပူး|ညီကို)\\s*([rR])?'
   '|(\\d)\\s*(ဘရိတ်|bk)'+SEP+AMT+
   '|(\\d{1,2}(?!\\d)(?:\\s*[.\\-]+\\s*\\d{1,2}(?!\\d))*)[\\s=\\-*\\/:,.]*([rR])?[\\s=\\-*\\/:,.]*'+AMT+'\\s*([rR])?'+
   '|(\\d{2,10})[\\s.\\-,]*(ခွေပူး|ခွေ)'+SEP+AMT+
-  '|(ခွေပူး|ခွေ)'+SEP+'(\\d{2,10})'+SEP+AMT;
+  '|(ခွေပူး|ခွေ)'+SEP+'(\\d{2,10})'+SEP+AMT+
+  '|(\\d)\\s*(ထိပ်|ပိတ်)'+SEP+AMT+
+  '|(ဆယ်ပြည့်|ဆယ်ဖြစ်)'+SEP+AMT;
 function toA(x){return parseInt(String(x).replace(/,/g,''),10)}
 // ရိုးရိုးဂဏန်း + အထူးစာလုံး (နက္ခ ပါဝါ အပူး ညီကို အပါ/ပတ် ဘရိတ်/bk) ကို နားလည်သည်
 function parseText(txt){
@@ -157,6 +179,8 @@ function parseText(txt){
     else if(m[8]){a=toA(m[10]);if(!a){bad.push(m[0]);continue}add(brk(+m[8]),a,m[8]+' '+m[9])}
     else if(m[11]){a=toA(m[13]);if(!a){bad.push(m[0]);continue}
       (m[11].match(/\d{1,2}/g)||[]).forEach(function(x){items.push({n:parseInt(x,10),a:a,r:!!(m[12]||m[14])})})}
+    else if(m[21]){a=toA(m[23]);if(!a){bad.push(m[0]);continue}add(m[22]==='ထိပ်'?topN(+m[21]):endN(+m[21]),a,m[21]+' '+m[22])}
+    else if(m[24]){a=toA(m[25]);if(!a){bad.push(m[0]);continue}add(m[24]==='ဆယ်ပြည့်'?sp(TEN):brk(0),a,m[24])}
     else{var dg=m[15]||m[19],kw=m[16]||m[18],ds=[],ii,jj,out=[];a=toA(m[17]||m[20]);if(!a){bad.push(m[0]);continue}
       for(ii=0;ii<dg.length;ii++)if(ds.indexOf(dg[ii])<0)ds.push(dg[ii]);
       for(ii=0;ii<ds.length;ii++)for(jj=0;jj<ds.length;jj++)if(ii!==jj||kw==='ခွေပူး')out.push(ds[ii]+ds[jj]);
@@ -249,6 +273,7 @@ function renderResult(){
 document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-act]');if(!b)return;var a=b.dataset.act,c=cur();
   if(a==='sel'){D.sel=b.dataset.id;armed=null;$('newc').hidden=true;save();renderAll()}
+  else if(a==='goday'){day=b.dataset.d;setSess(b.dataset.s);window.scrollTo(0,0)}
   else if(a==='newc'){$('newc').hidden=!$('newc').hidden;if(!$('newc').hidden)$('nn').focus()}
   else if(a==='de'&&c){c.entries=c.entries.filter(function(e){return e.id!==b.dataset.e});save();renderDetail();renderResult()}
   else if(a==='delc'&&c){
@@ -260,7 +285,12 @@ function newName(){var n=$('nn').value.trim();if(!n)return;var c={id:'c'+uid(),n
 $('nsave').onclick=newName;$('nn').onkeydown=function(e){if(e.key==='Enter')newName()};
 function renderAll(){renderNames();renderDetail();renderResult()}
 function setSess(s){sess=s;$('s1').setAttribute('aria-pressed',s==='1');$('s2').setAttribute('aria-pressed',s==='2');
-  load();$('dup').checked=!!D.dup;$('win').value=D.win;$('pct').value=D.pct;$('mul').value=D.mul;$('skip').hidden=true;$('newc').hidden=true;renderAll()}
+  load();$('dup').checked=!!D.dup;$('win').value=D.win;$('pct').value=D.pct;$('mul').value=D.mul;$('skip').hidden=true;$('newc').hidden=true;renderAll();
+  $('day').value=day;$('daynote').textContent=day===ymd(new Date())?'':'⚠ '+day+' ရက်စွဲ စာရင်းကို ကြည့်နေသည် (ယနေ့ မဟုတ်ပါ)';renderHistory()}
+function shiftDay(n){var q=day.split('-'),d=new Date(+q[0],+q[1]-1,+q[2]+n);day=ymd(d);setSess(sess)}
+$('dprev').onclick=function(){shiftDay(-1)};$('dnext').onclick=function(){shiftDay(1)};
+$('dtoday').onclick=function(){day=ymd(new Date());setSess(sess)};
+$('day').onchange=function(){if(this.value){day=this.value;setSess(sess)}};
 $('s1').onclick=function(){setSess('1')};$('s2').onclick=function(){setSess('2')};
 $('dup').onchange=function(){D.dup=this.checked;save()};
 (function(){var h='';
@@ -268,73 +298,12 @@ $('dup').onchange=function(){D.dup=this.checked;save()};
   h+='<b>ညီကို R</b> 1000 → ၂၀ ခု (ပြောင်းပြန်ပါ)<br>';
   h+='<b>1 အပါ / 1 ပတ်</b> 1000 → '+withDigit(1).join(' ')+'<br>';
   h+='<b>5 ဘရိတ် / 5bk</b> 1000 → '+brk(5).join(' ')+' (0 မှ 9 ရ)';
+  h+='<br><b>5 ထိပ်</b> 1000 → '+topN(5).join(' ')+'<br><b>3 ပိတ်</b> 1000 → '+endN(3).join(' ')+' (0 မှ 9 ရ)<br>';
+  h+='<b>ဆယ်ပြည့်</b> 1000 → '+TEN+'<br><b>ဆယ်ဖြစ်</b> 1000 → '+brk(0).join(' ')+'<br>';
   h+='<br><b>70-73-75-R-5000</b> → ဂဏန်းအများကို - နဲ့ ဆက်ရေးလို့ရ၊ R ပါရင် ပြောင်းပြန်ပါ၊ ငွေက အားလုံးအတူတူ<br>';
   h+='<b>1397-ခွေပူး-1500</b> → ဂဏန်း ၄လုံးရဲ့ ပတ်လည် ၁၂ကွက် + အပူး ၄ကွက် (၁၆ ခု)<br>';
   h+='<b>1397-ခွေ-1500</b> → အပူးမပါ ၁၂ ကွက်';
   $('help').innerHTML=h})();
-var smp=null;
-try{if(window.claude&&window.claude.use)window.claude.use('sample').then(function(x){smp=x}).catch(function(){})}catch(e){}
-var PROMPT='ဒီပုံက 2D ထိုးသူရဲ့ စာရင်းပါ။ ပုံထဲက ဂဏန်းနဲ့ ငွေပမာဏ စာကြောင်းတိုင်းကို တစ်ကြောင်းမှ မကျန်စေရဘဲ အစီအစဉ်အတိုင်း စာသားအဖြစ် ကူးထုတ်ပါ။ တစ်ကြောင်းကို output တစ်ကြောင်းနဲ့ ရေးပါ။ R၊ နက္ခ၊ ပါဝါ၊ အပူး၊ ညီကို၊ အပါ၊ ပတ်၊ ဘရိတ်၊ bk စတဲ့ စာလုံးတွေကိုလည်း ပုံထဲကအတိုင်း ထားပါ။ ဂဏန်းကို မပြင်ပါနဲ့၊ မသေချာတာကို မှန်းမရေးဘဲ ? ထည့်ပါ။ ကူးထုတ်ထားတဲ့ စာသားသာ ပြန်ပေးပါ၊ ရှင်းပြချက် မထည့်ပါနဲ့။';
-function shrink(file){return new Promise(function(ok,no){var u=URL.createObjectURL(file),im=new Image();
-  im.onload=function(){var k=Math.min(1,1800/Math.max(im.width,im.height)),c=document.createElement('canvas');
-    c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);
-    c.toBlob(function(b){b?ok(b):no(new Error('ပုံပြောင်း၍မရ'))},'image/jpeg',.88)};
-  im.onerror=function(){no(new Error('ပုံဖွင့်၍မရ'))};im.src=u})}
-function toB64(b){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result).split(',')[1])};r.onerror=function(){no(new Error('ပုံဖတ်၍မရ'))};r.readAsDataURL(b)})}
-function loadScript(u){return new Promise(function(ok,no){var t=document.createElement('script');t.src=u;t.onload=ok;t.onerror=function(){no(new Error('OCR library ဖွင့်၍မရ (အင်တာနက်စစ်ပါ)'))};document.head.appendChild(t)})}
-var mode='';
-function stat(m,err){var e=$('imgstat');e.textContent=m;e.className='msg'+(err?' err':'')}
-function withTimeout(p,ms){return Promise.race([p,new Promise(function(_,no){setTimeout(function(){no(new Error('အချိန်ကြာလွန်းသည် (အင်တာနက်နှေးနိုင်သည်)၊ ပြန်ကြိုးစားပါ'))},ms)})])}
-function prep(b){return new Promise(function(ok,no){var im=new Image(),u=URL.createObjectURL(b);
-  im.onload=function(){var k=Math.max(1,Math.min(3,2400/Math.max(im.width,im.height))),c=document.createElement('canvas');
-    c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);var x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
-    var d=x.getImageData(0,0,c.width,c.height),a=d.data,i,sum=0,n=a.length/4;
-    for(i=0;i<a.length;i+=4){a[i]=a[i]*.3+a[i+1]*.59+a[i+2]*.11;sum+=a[i]}
-    var inv=sum/n<110,th=Math.min(150,Math.max(100,sum/n*0.8));
-    for(i=0;i<a.length;i+=4){var g=inv?(a[i]>th?0:255):(a[i]<th?0:255);a[i]=a[i+1]=a[i+2]=g}
-    x.putImageData(d,0,0);URL.revokeObjectURL(u);c.toBlob(function(r){r?ok(r):no(new Error('prep'))},'image/png')};
-  im.onerror=function(){no(new Error('prep'))};im.src=u})}
-async function ocr(b){
-  stat('OCR စနစ်ကို ဒေါင်းလုဒ်လုပ်နေသည်... (ပထမအကြိမ် တစ်မိနစ်လောက် ကြာနိုင်)');
-  if(!window.Tesseract)await withTimeout(loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'),60000);
-  var w=await withTimeout(window.Tesseract.createWorker('eng',1,{logger:function(m){
-    if(m.status==='recognizing text')stat('ဖတ်နေသည်... '+Math.round(m.progress*100)+'%');
-    else stat('OCR ပြင်ဆင်နေသည်... ('+m.status+' '+Math.round((m.progress||0)*100)+'%)')}}),150000);
-  try{
-    await w.setParameters({tessedit_char_whitelist:'0123456789RrBbKk=-/:., ',tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
-    var pb=b;try{pb=await prep(b)}catch(e){}
-    var r=await withTimeout(w.recognize(pb),120000);mode='ocr';return r.data.text;
-  }finally{try{await w.terminate()}catch(e){}}
-}
-async function readImage(b){
-  if(smp){var r=await smp(PROMPT,{images:[b],cache:false});mode='ai';return String(r.text||'')}
-  var cfg=window.APP_CONFIG||{};
-  if(cfg.API_URL){
-    var key='';try{key=localStorage.getItem('app_key')||''}catch(e){}
-    var res=await fetch(cfg.API_URL,{method:'POST',headers:{'content-type':'application/json','x-app-key':key},body:JSON.stringify({image:await toB64(b),mediaType:'image/jpeg'})});
-    if(res.status===401){try{localStorage.removeItem('app_key')}catch(e){}
-      var k=window.prompt('Access key ထည့်ပါ');if(!k)throw new Error('Access key လိုပါတယ်');
-      try{localStorage.setItem('app_key',k)}catch(e){}return readImage(b)}
-    var j=await res.json().catch(function(){return {}});
-    if(!res.ok)throw new Error(j.error||('HTTP '+res.status));mode='ai';return j.text||'';
-  }
-  return ocr(b);
-}
-async function handleFiles(files){
-  if(!files.length)return;
-  for(var i=0;i<files.length;i++){
-    stat('ပုံ '+(i+1)+'/'+files.length+' ကို ပြင်ဆင်နေသည်...');
-    try{
-      var b=await shrink(files[i]),t=String(await readImage(b)).replace(/^```.*$/gm,'').trim();
-      if(!t){stat('ပုံထဲမှာ ဂဏန်းမတွေ့ပါ။ ဂဏန်းပါတဲ့ အပိုင်းကိုပဲ crop လုပ်ပြီး ထပ်ကြိုးစားပါ။',1);return}
-      $('inp').value=($('inp').value?$('inp').value.trim()+'\n':'')+t;
-      var n=t.split(/\n/).filter(Boolean).length;
-      stat('ပြီးပါပြီ — '+n+' ကြောင်း အပေါ်ကွက်ထဲ ရောက်ပါပြီ။ မှန်မမှန်စစ်ပြီး "ထည့်မည်" နှိပ်ပါ။'+(mode==='ocr'?' (OCR မို့ မှားနိုင်သည်၊ သေချာစစ်ပါ)':''));
-    }catch(e){stat('ဖတ်လို့မရပါ: '+((e&&(e.message||e.code))||e),1);return}
-  }
-}
-function pick(){var f=[].slice.call(this.files);this.value='';handleFiles(f)}
-$('img').onchange=pick;$('cam').onchange=pick;
 setSess('1');
 })();
 </script>
