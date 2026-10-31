@@ -59,6 +59,7 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
 .dhead b{font-size:16px}.dbody{flex:1;overflow:auto;padding:12px 14px}
 .dbody section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
 .dfoot{padding:10px 14px;border-top:1px solid var(--line);text-align:center;font-size:12px;color:var(--mute);letter-spacing:.02em}
+.winbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--hi);font-size:14px}.winbox table{margin:6px 0 0}
 .g summary{cursor:pointer;font-weight:600;padding:7px 0;font-size:14px}.g details{border-bottom:1px solid var(--line)}.g details:last-child{border:0}
 .g ul{margin:2px 0 8px;padding-left:18px}.g li{font-size:13px;line-height:1.75;margin-bottom:3px}.g code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12.5px;word-break:break-all}
 .devid{font:700 21px/1.4 ui-monospace,monospace;letter-spacing:.06em;text-align:center;user-select:all}
@@ -74,6 +75,7 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
 </div>
 <div class="seg" id="daybar"><button id="dprev" aria-label="မနေ့">◀</button><input type="date" id="day" aria-label="ရက်စွဲ" style="flex:3;min-width:0;text-align:center"><button id="dnext" aria-label="နက်ဖြန်">▶</button><button id="dtoday">ယနေ့</button></div>
 <div class="msg" id="daynote" style="margin:-4px 0 8px;color:var(--acc);font-weight:600"></div>
+<div id="bkwarn" data-act="opentab" hidden style="margin:-2px 0 10px;padding:7px 10px;border-radius:8px;background:#fff3d6;color:#7a5200;font-size:13px;cursor:pointer"></div>
 <div class="names" id="names"></div>
 <div class="card" id="newc" hidden>
   <label for="nn">ဖောက်သည်နာမည် အသစ်</label>
@@ -113,6 +115,7 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
   </div>
   <label class="chk"><input type="checkbox" id="dup"> ၁ အပါ/ပတ် စသည်မှာ 11 (အပူး) ကို နှစ်ကြိမ်ထည့်ရန် (စုစုပေါင်း ၂၀ ခု)</label>
   <div id="res" style="margin-top:8px"></div>
+  <div id="slipbox" hidden style="margin-top:10px"><label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mute)"><input type="checkbox" id="slipcom" checked style="width:auto"> % နုတ်ပြီး ကျန်ငွေပါ ထည့်မည်</label><textarea id="slip" rows="9" readonly style="margin-top:6px"></textarea><div class="msg" id="slipmsg"></div></div>
 </div>
 </main>
 <div id="drawerbk" hidden></div>
@@ -121,6 +124,17 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
   <div class="dbody">
     <section><h2>Key / သက်တမ်း</h2><div id="licbox" class="msg">Key စနစ် မဖွင့်ထားပါ</div></section>
     <section><h2>တစ်နေ့တာ မှတ်တမ်း (History)</h2><div id="histlist" class="tw"></div></section>
+    <section><h2>Backup / Restore (စာရင်းသိမ်းဆည်းခြင်း)</h2>
+      <div id="bkinfo" class="msg" style="margin-top:0"></div>
+      <button class="link" id="bkfile" style="width:100%;margin-top:8px">⬇ Backup ဖိုင် ထုတ်မည်</button>
+      <button class="link" id="bkcopy" style="width:100%;margin-top:6px">📋 Backup စာ ကူးမည်</button>
+      <button class="link" id="bkshare" hidden style="width:100%;margin-top:6px">↗ Backup ပို့မည်</button>
+      <label style="margin-top:12px">Backup ပြန်သွင်းရန် — ဖိုင်ရွေးပါ (သို့) စာကို ဒီမှာ paste လုပ်ပါ</label>
+      <input type="file" id="bkpick" accept=".json,application/json">
+      <textarea id="bktext" rows="3" placeholder='{"app":"2d-ledger",...}' style="margin-top:6px"></textarea>
+      <button class="go" id="bkrestore" style="margin-top:8px">ပြန်သွင်းမည်</button>
+      <div class="msg" id="bkmsg"></div>
+    </section>
     <section class="g"><h2>အသုံးပြုပုံ (အသေးစိတ်)</h2>
       <details open><summary>၁။ စတင်ရန်</summary><ul>
         <li>အပေါ်ဆုံး <b>12:01 / 4:30</b> ခလုတ်နဲ့ အချိန်စာရင်း ရွေးပါ။ အချိန်တစ်ခုချင်းစီ စာရင်း သီးသန့်ပါ။</li>
@@ -174,8 +188,22 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(-
         <li>ရလာတဲ့ key ကို "Activation key ထည့်ရန်" ကွက်မှာ paste လုပ်ပြီး <b>Key ဖွင့်မည်</b> နှိပ်ပါ။ key က ဒီ Device ID စက်မှာပဲ သုံးလို့ရပါတယ်။</li>
         <li>သက်တမ်းကုန်ခါနီးရင် ဒီ Tab ထဲက <b>Key သက်တမ်းတိုးရန်</b> ခလုတ်ကို နှိပ်ပြီး Telegram နဲ့ ဆက်သွယ်ပါ။ key အသစ်ရရင် ထပ်ထည့်ပါ။</li>
       </ul></details>
-      <details><summary>၉။ သတိပြုရန်</summary><ul>
-        <li>စာရင်းအားလုံးကို ဒီဖုန်းရဲ့ browser/app ထဲမှာပဲ သိမ်းပါတယ်။ Browser data ရှင်းရင်၊ app ကို ဖျက်ရင် စာရင်းပျောက်ပါမယ်။ Device ID လည်း ပြောင်းသွားပါမယ်။</li>
+      <details><summary>၉။ စာရင်းကူးပို့၊ ထိတဲ့သူများ</summary><ul>
+        <li>"ထွက်ဂဏန်း တွက်ရန်" အောက်က <b>📋 စာရင်းကူးမည်</b> ကိုနှိပ်ရင် ရွေးထားတဲ့ နာမည်ရဲ့ စာရင်းကို စာအဖြစ် ကူးပေးပါတယ်။ Telegram/Viber မှာ paste လုပ်ပြီး ဖောက်သည်ကို ပို့ပါ။ <b>↗ ပို့မည်</b> ကနေ တိုက်ရိုက်လည်း ပို့လို့ရပါတယ် (ဖုန်းက ခွင့်ပြုရင်)။</li>
+        <li>စာထဲမှာ ငွေတူတဲ့ ဂဏန်းတွေကို စုပေါင်းပြပါတယ်။ "% နုတ်ပြီး ကျန်ငွေပါ ထည့်မည်" ကွက်ကို ဖြုတ်ရင် နုတ်ငွေ၊ ကျန်ငွေကို မထည့်ပါဘူး။</li>
+        <li><b>အားလုံး</b> ကိုရွေးပြီး နှိပ်ရင် လူတိုင်းရဲ့ စုစုပေါင်းချုပ်ကို ကူးပေးပါတယ်။</li>
+        <li>ထွက်ဂဏန်းထည့်ထားရင် <b>အားလုံး</b> မှာ "ထိတဲ့သူများ" ဇယားပေါ်ပါမယ် (ဘယ်သူ၊ တင်ငွေ၊ ဆပေးရမည့်ငွေ၊ စုစုပေါင်း)။ နာမည်တစ်ခုရွေးထားရင် ထိ/မထိ ပြပါတယ်။</li>
+      </ul></details>
+      <details><summary>၁၀။ Backup / Restore</summary><ul>
+        <li>စာရင်းတွေက ဖုန်းထဲမှာပဲ ရှိတာမို့ <b>Backup</b> ပုံမှန်လုပ်ထားပါ။ Tab ထဲက "Backup / Restore" မှာ:</li>
+        <li><b>Backup ဖိုင် ထုတ်မည်</b>: ဖိုင်တစ်ခု (<code>2d-backup-ရက်စွဲ.json</code>) ဒေါင်းလုဒ်ဖြစ်ပါတယ်။ ဖိုင်ကို Telegram Saved Messages/Drive ထဲ သိမ်းထားပါ။</li>
+        <li><b>Backup စာ ကူးမည်</b>: ဖိုင်မရတဲ့အခါ (APK မှာ) စာအဖြစ်ကူးပြီး Telegram "Saved Messages" ထဲ paste လုပ်သိမ်းပါ။</li>
+        <li><b>ပြန်သွင်းမည်</b>: ဖိုင်ရွေးပါ (သို့) စာ paste လုပ်ပါ။ ပြီးရင် ခလုတ်ကို နှစ်ခါနှိပ်ပါ။ Backup ထဲက ရက်တွေက ဒီဖုန်းက အဲဒီရက်တွေကို အစားထိုးပါမယ်၊ Backup ထဲမပါတဲ့ ရက်တွေကို မထိပါ။</li>
+        <li>Backup မလုပ်တာ ၇ ရက်ကျော်ရင် (သို့) တစ်ခါမှ မလုပ်ရသေးရင် စာမျက်နှာထိပ်မှာ အဝါရောင်သတိပေးပါမယ်။ နှိပ်ရင် Tab ပွင့်ပါတယ်။</li>
+        <li>Activation key က Backup ထဲမပါပါဘူး။ ဖုန်းအသစ်ဆိုရင် Device ID အသစ်နဲ့ key ထပ်ယူရပါမယ်။</li>
+      </ul></details>
+      <details><summary>၁၁။ သတိပြုရန်</summary><ul>
+        <li>စာရင်းအားလုံးကို ဒီဖုန်းရဲ့ browser/app ထဲမှာပဲ သိမ်းပါတယ်။ Browser data ရှင်းရင်၊ app ကို ဖျက်ရင် စာရင်းပျောက်ပါမယ်။ Device ID လည်း ပြောင်းသွားပါမယ်။ <b>ဒါကြောင့် Backup လုပ်ထားပါ။</b></li>
         <li>ထွက်ဂဏန်းရလဒ်ကို app က အလိုအလျောက် မယူပါ။ ကိုယ်တိုင် ထည့်ပေးရပါမယ်။</li>
       </ul></details>
     </section>
@@ -208,7 +236,7 @@ function load(){var s=null,mig=false;try{s=JSON.parse(localStorage.getItem(key()
   D=s||{};D.custs=D.custs||[];D.pct=D.pct==null?'15':D.pct;D.mul=D.mul==null?'85':D.mul;D.win=D.win||'';D.sel=D.sel||'all';D.dup=D.dup==null?true:D.dup;
   if(D.sel!=='all'&&!D.custs.some(function(c){return c.id===D.sel}))D.sel='all';
   if(mig)save()}
-function save(){try{localStorage.setItem(key(),JSON.stringify(D))}catch(e){}try{renderHistory()}catch(e){}}
+function save(){try{localStorage.setItem(key(),JSON.stringify(D))}catch(e){}try{renderHistory()}catch(e){}try{bkCheck()}catch(e){}}
 function sumL(L){var tw=0,net=0,has=false,w=(L.win||'').length===2?parseInt(L.win,10):-1;
   (L.custs||[]).forEach(function(c){var T=tot(c.entries||[]),p=(c.pct!==''&&c.pct!=null)?num(c.pct):num(L.pct==null?15:L.pct),m=(c.mul!==''&&c.mul!=null)?num(c.mul):num(L.mul==null?85:L.mul);
     tw+=T.sum;if(w>=0){net+=T.sum-T.sum*p/100-T.t[w]*m;has=true}});return {sum:tw,net:net,has:has,w:w}}
@@ -355,7 +383,12 @@ function renderResult(){
     if(rs.length)h+='<div class="tw"><table><thead><tr><th>နာမည်</th><th>စုစုပေါင်း</th><th>ကျန်ငွေ</th>'+(w>=0?'<th>ဆပေး</th><th>အမြတ်/အရှုံး</th>':'')+'</tr></thead><tbody>'+
       rs.map(function(r){return '<tr><td>'+esc(r.name||'-')+(r.top?' <small class="topnum">★'+r.top+'</small>':'')+'</td><td>'+fmt(r.sum)+'</td><td>'+fmt(r.rest)+'</td>'+(w>=0?'<td>'+fmt(r.pay)+'</td><td class="'+(r.net>=0?'pos':'neg')+'">'+money(r.net)+'</td>':'')+'</tr>'}).join('')+'</tbody></table></div>';
     h+=lines(G,w,false);
+    if(w>=0){var wl=rs.filter(function(r){return r.stake>0}).sort(function(a,b){return b.pay-a.pay});
+      h+='<div class="winbox"><b>ထွက်ဂဏန်း '+pad(w)+' — ထိတဲ့သူများ</b>'+(wl.length?'<table><thead><tr><th>နာမည်</th><th>တင်ငွေ</th><th>ဆပေး</th></tr></thead><tbody>'+wl.map(function(r){return '<tr><td>'+esc(r.name||'-')+'</td><td>'+fmt(r.stake)+'</td><td><b>'+fmt(r.pay)+'</b></td></tr>'}).join('')+
+        '<tr><td><b>စုစုပေါင်း</b></td><td>'+fmt(wl.reduce(function(q,r){return q+r.stake},0))+'</td><td><b>'+fmt(wl.reduce(function(q,r){return q+r.pay},0))+'</b></td></tr></tbody></table>':'<div class="msg">ဘယ်သူမှ မထိပါ</div>')+'</div>'}
   }
+  if(c&&w>=0){h+='<div class="winbox">'+(calc(c,w).stake>0?'✅ ထိသည် · တင်ငွေ '+fmt(calc(c,w).stake)+' → ဆပေးရမည့်ငွေ <b>'+fmt(calc(c,w).pay)+'</b>':'မထိပါ')+'</div>'}
+  if(c||D.custs.length)h+='<div class="two" style="margin-top:10px"><button class="link" data-act="slip">📋 '+(c?'ဒီနာမည်':'အားလုံး')+' စာရင်းကူးမည်</button>'+(navigator.share?'<button class="link" data-act="share">↗ ပို့မည်</button>':'')+'</div>';
   var g='',ch='',mx=Math.max.apply(null,T),tops=[];
   for(i=0;i<100;i++){var tpx=mx>0&&T[i]===mx;if(tpx)tops.push(pad(i));g+='<div class="c'+(T[i]?' has':'')+(i===w?' win':'')+(tpx?' top':'')+'"><b>'+pad(i)+'</b><i>'+compact(T[i])+'</i></div>';if(T[i])ch+='<span class="chip'+(tpx?' top':'')+'">'+(tpx?'★ ':'')+'<b>'+pad(i)+'</b> '+fmt(T[i])+'</span>'}
   $('grid').innerHTML=g;$('toptag').innerHTML=mx>0?'★ အများဆုံး: <b>'+tops.join(', ')+'</b> — '+fmt(mx):'';$('chips').innerHTML=ch||'<span class="msg">မရှိသေးပါ</span>';$('res').innerHTML=h;
@@ -368,6 +401,9 @@ function renderResult(){
 document.addEventListener('click',function(ev){
   var b=ev.target.closest('[data-act]');if(!b)return;var a=b.dataset.act,c=cur();
   if(a==='sel'){D.sel=b.dataset.id;armed=null;$('newc').hidden=true;save();renderAll()}
+  else if(a==='opentab'){openDrawer()}
+  else if(a==='slip'){showSlip(false)}
+  else if(a==='share'){showSlip(true)}
   else if(a==='goday'){day=b.dataset.d;setSess(b.dataset.s);closeDrawer();window.scrollTo(0,0)}
   else if(a==='newc'){$('newc').hidden=!$('newc').hidden;if(!$('newc').hidden)$('nn').focus()}
   else if(a==='de'&&c){c.entries=c.entries.filter(function(e){return e.id!==b.dataset.e});save();renderDetail();renderResult()}
@@ -381,10 +417,69 @@ $('nsave').onclick=newName;$('nn').onkeydown=function(e){if(e.key==='Enter')newN
 function renderAll(){renderNames();renderDetail();renderResult()}
 function setSess(s){sess=s;$('s1').setAttribute('aria-pressed',s==='1');$('s2').setAttribute('aria-pressed',s==='2');
   load();$('dup').checked=!!D.dup;$('win').value=D.win;$('pct').value=D.pct;$('mul').value=D.mul;$('skip').hidden=true;$('newc').hidden=true;renderAll();
-  $('day').value=day;$('daynote').textContent=day===ymd(new Date())?'':'⚠ '+day+' ရက်စွဲ စာရင်းကို ကြည့်နေသည် (ယနေ့ မဟုတ်ပါ)';renderHistory()}
-function openDrawer(){$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');$('drawerbk').hidden=false;$('tabbtn').setAttribute('aria-expanded','true');renderHistory()}
+  $('day').value=day;$('daynote').textContent=day===ymd(new Date())?'':'⚠ '+day+' ရက်စွဲ စာရင်းကို ကြည့်နေသည် (ယနေ့ မဟုတ်ပါ)';renderHistory();bkCheck()}
+function openDrawer(){$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');$('drawerbk').hidden=false;$('tabbtn').setAttribute('aria-expanded','true');renderHistory();bkInfo()}
 function closeDrawer(){$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');$('drawerbk').hidden=true;$('tabbtn').setAttribute('aria-expanded','false')}
 $('tabbtn').onclick=openDrawer;$('dclose').onclick=closeDrawer;$('drawerbk').onclick=closeDrawer;
+function sl(){return sess==='1'?'12:01':'4:30'}
+function fb(t){try{var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');ta.remove();return ok}catch(e){return false}}
+function copyText(t){return new Promise(function(ok){try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){ok(true)},function(){ok(fb(t))});return}}catch(e){}ok(fb(t))})}
+function slipText(c,w,wc){
+  var r=calc(c,w),T=tot(c.entries),by={},i,L;
+  for(i=0;i<100;i++)if(T.t[i])(by[T.t[i]]=by[T.t[i]]||[]).push(pad(i));
+  L=['📒 '+c.name,'📅 '+day+' · '+sl(),'────────────'];
+  Object.keys(by).map(Number).sort(function(a,b){return b-a}).forEach(function(a){L.push(fmt(a)+' ➜ '+by[a].join(' '))});
+  if(!r.sum)L.push('(ဂဏန်းမရှိသေးပါ)');
+  L.push('────────────','စုစုပေါင်း ထိုးကြေး: '+fmt(r.sum));
+  if(wc)L.push(fmt(r.p)+'% နုတ်: '+fmt(r.com),'နုတ်ပြီး ကျန်ငွေ: '+fmt(r.rest));
+  if(w>=0){L.push('','ထွက်ဂဏန်း: '+pad(w));L.push(r.stake>0?'✅ ထိသည် · တင်ငွေ '+fmt(r.stake)+' × '+fmt(r.m)+' = '+fmt(r.pay):'မထိပါ')}
+  return L.join('\n');
+}
+function slipAll(w,wc){
+  var rs=D.custs.map(function(x){return calc(x,w)}),S={sum:0,com:0,rest:0,pay:0},L=['📒 အားလုံး စာရင်းချုပ်','📅 '+day+' · '+sl(),'────────────'];
+  rs.forEach(function(r){if(!r.sum)return;L.push(r.name+': '+fmt(r.sum)+(wc?' → ကျန် '+fmt(r.rest):'')+(w>=0&&r.stake>0?' · ထိ '+fmt(r.stake)+' → '+fmt(r.pay):''));S.sum+=r.sum;S.com+=r.com;S.rest+=r.rest;S.pay+=r.pay});
+  L.push('────────────','စုစုပေါင်း ထိုးကြေး: '+fmt(S.sum));
+  if(wc)L.push('နုတ်ငွေ စုစုပေါင်း: '+fmt(S.com),'နုတ်ပြီး ကျန်ငွေ: '+fmt(S.rest));
+  if(w>=0){L.push('','ထွက်ဂဏန်း: '+pad(w),'ဆပေးရမည့်ငွေ စုစုပေါင်း: '+fmt(S.pay));if(wc)L.push((S.rest-S.pay>=0?'အမြတ်: ':'အရှုံး: ')+money(S.rest-S.pay))}
+  return L.join('\n');
+}
+function slipNow(){var w=D.win.length===2?parseInt(D.win,10):-1,wc=$('slipcom').checked,c=cur();return c?slipText(c,w,wc):slipAll(w,wc)}
+function showSlip(share){
+  var t=slipNow();$('slipbox').hidden=false;$('slip').value=t;
+  if(share&&navigator.share){navigator.share({text:t}).catch(function(){});return}
+  copyText(t).then(function(ok){$('slipmsg').textContent=ok?'✅ ကူးပြီးပါပြီ — Telegram/Viber မှာ paste လုပ်ပြီး ပို့ပါ':'အောက်ကစာကို ဖိနှိပ်ပြီး ကိုယ်တိုင်ကူးပါ';var b=$('slipbox');if(b.scrollIntoView)b.scrollIntoView({block:'center'})})
+}
+$('slipcom').onchange=function(){if(!$('slipbox').hidden)$('slip').value=slipNow()};
+// ---- Backup / Restore
+function bkCollect(){var o={};allKeys().forEach(function(x){try{var v=localStorage.getItem(x.k);if(v)o[x.k]=v}catch(e){}});return {app:'2d-ledger',v:1,at:new Date().toISOString(),data:o}}
+function bkText(){return JSON.stringify(bkCollect())}
+function bkMark(){try{localStorage.setItem('last_backup',String(Date.now()))}catch(e){}bkInfo();bkCheck()}
+function lastBk(){try{return +localStorage.getItem('last_backup')||0}catch(e){return 0}}
+function bkInfo(){var n=allKeys().length,lb=lastBk();$('bkinfo').textContent='သိမ်းထားတဲ့ စာရင်း '+n+' ခု (ရက်/အချိန်အလိုက်) · နောက်ဆုံး Backup: '+(lb?ymd(new Date(lb)):'မလုပ်ရသေးပါ')}
+function bkCheck(){var n=allKeys().length,lb=lastBk(),old=lb&&(Date.now()-lb>7*864e5),w=$('bkwarn');
+  if(n>0&&(!lb||old)){w.hidden=false;w.textContent='⚠ '+(lb?'Backup လုပ်တာ ၇ ရက်ကျော်ပါပြီ':'Backup မလုပ်ရသေးပါ')+' — ဒီမှာနှိပ်ပြီး Tab ထဲက Backup လုပ်ပါ'}else w.hidden=true}
+function bkMsg(t,err){var m=$('bkmsg');m.textContent=t;m.className='msg'+(err?' err':'')}
+$('bkfile').onclick=function(){var t=bkText(),name='2d-backup-'+ymd(new Date())+'.json';
+  try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){try{URL.revokeObjectURL(a.href);a.remove()}catch(e){}},1500)}catch(e){bkMsg('ဖိုင်ထုတ်မရပါ — "Backup စာ ကူးမည်" ကိုသုံးပါ',1);return}
+  bkMark();bkMsg('ဖိုင်ထုတ်ပြီး ('+name+')။ ဒေါင်းလုဒ်ထဲမှာ မတွေ့ရင် "Backup စာ ကူးမည်" ကိုသုံးပါ။ ဖိုင်ကို Telegram/Drive ထဲ သိမ်းထားပါ။')};
+$('bkcopy').onclick=function(){copyText(bkText()).then(function(ok){if(ok){bkMark();bkMsg('✅ Backup စာ ကူးပြီး — Telegram "Saved Messages" ထဲ paste လုပ်သိမ်းထားပါ')}else{$('bktext').value=bkText();$('bktext').select();bkMsg('အောက်ကကွက်ထဲ စာထွက်လာပါပြီ၊ ဖိနှိပ်ပြီး ကိုယ်တိုင်ကူးပါ',1)}})};
+if(navigator.share){$('bkshare').hidden=false;$('bkshare').onclick=function(){var t=bkText(),name='2d-backup-'+ymd(new Date())+'.json';
+  var go=function(d){return navigator.share(d).then(function(){bkMark()}).catch(function(){})};
+  try{var f=new File([t],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){go({files:[f],title:name});return}}catch(e){}
+  go({text:t})}}
+$('bkpick').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var r=new FileReader();r.onload=function(){$('bktext').value=String(r.result);bkMsg('ဖိုင်ဖတ်ပြီး — "ပြန်သွင်းမည်" ကို နှစ်ခါနှိပ်ပါ')};r.onerror=function(){bkMsg('ဖိုင်ဖတ်မရပါ',1)};r.readAsText(f)};
+function bkRestore(text){var o;try{o=JSON.parse(text)}catch(e){return {err:'Backup စာ/ဖိုင် မမှန်ပါ'}}
+  if(!o||o.app!=='2d-ledger'||!o.data)return {err:'ဒီစာက 2D စာရင်း Backup မဟုတ်ပါ'};
+  var n=0;Object.keys(o.data).forEach(function(k){if(/^ledger2d_d_\d{4}-\d{2}-\d{2}_[12]$/.test(k)&&typeof o.data[k]==='string'){try{JSON.parse(o.data[k]);localStorage.setItem(k,o.data[k]);n++}catch(e){}}});
+  return n?{n:n}:{err:'ပြန်သွင်းစရာ စာရင်း မတွေ့ပါ'}}
+var bkArmed=false;
+$('bkrestore').onclick=function(){
+  var t=$('bktext').value.trim();if(!t){bkMsg('ဖိုင်ရွေးပါ၊ ဒါမှမဟုတ် Backup စာကို paste လုပ်ပါ',1);return}
+  if(!bkArmed){bkArmed=true;this.textContent='ထပ်နှိပ်ရင် ပြန်သွင်းမည် (အတူတူရက်တွေကို အစားထိုးမယ်)';var b=this;setTimeout(function(){bkArmed=false;b.textContent='ပြန်သွင်းမည်'},4000);return}
+  bkArmed=false;this.textContent='ပြန်သွင်းမည်';
+  var r=bkRestore(t);if(r.err){bkMsg(r.err,1);return}
+  $('bktext').value='';setSess(sess);bkMsg('✅ စာရင်း '+r.n+' ခု ပြန်သွင်းပြီးပါပြီ');
+};
 function shiftDay(n){var q=day.split('-'),d=new Date(+q[0],+q[1]-1,+q[2]+n);day=ymd(d);setSess(sess)}
 $('dprev').onclick=function(){shiftDay(-1)};$('dnext').onclick=function(){shiftDay(1)};
 $('dtoday').onclick=function(){day=ymd(new Date());setSess(sess)};
